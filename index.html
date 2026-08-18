@@ -1,260 +1,803 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BEE Кликер</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background: linear-gradient(145deg, #1e2a3a, #0f172a);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: white;
-        }
-        .container {
-            background: rgba(255,255,255,0.05);
-            backdrop-filter: blur(10px);
-            padding: 30px 20px;
-            border-radius: 40px;
-            width: 360px;
-            max-width: 98%;
-            text-align: center;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
-            border: 1px solid rgba(255,215,0,0.2);
-        }
-        h1 { font-size: 2.2rem; color: #facc15; text-shadow: 0 0 20px #facc1550; }
-        .balance {
-            font-size: 2.8rem;
-            font-weight: bold;
-            margin: 15px 0 5px;
-            background: #1e293b;
-            padding: 10px 20px;
-            border-radius: 60px;
-            display: inline-block;
-            border: 1px solid #facc1540;
-        }
-        .click-area {
-            width: 200px;
-            height: 200px;
-            margin: 20px auto;
-            background: radial-gradient(circle, #facc15, #b45309);
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 4rem;
-            cursor: pointer;
-            box-shadow: 0 0 40px #facc1570;
-            transition: transform 0.1s;
-            color: #0f172a;
-            font-weight: bold;
-            text-shadow: 0 2px 10px rgba(255,255,255,0.5);
-        }
-        .click-area:active { transform: scale(0.92); }
-        .stats {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px 0;
-            font-size: 1.1rem;
-            background: #1e293b80;
-            border-radius: 30px;
-            padding: 12px 20px;
-            margin: 15px 0;
-        }
-        .upgrade-btn {
-            background: #facc15;
-            color: #0f172a;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 40px;
-            font-weight: bold;
-            font-size: 1.1rem;
-            width: 100%;
-            margin: 8px 0;
-            cursor: pointer;
-            transition: 0.2s;
-            box-shadow: 0 4px 0 #b45309;
-        }
-        .upgrade-btn:active { transform: translateY(4px); box-shadow: none; }
-        .upgrade-btn:disabled { opacity: 0.4; transform: none; box-shadow: 0 4px 0 #b45309; }
-        .ref-link {
-            background: #1e293b;
-            padding: 10px;
-            border-radius: 30px;
-            margin: 15px 0;
-            font-size: 0.9rem;
-            word-break: break-all;
-            border: 1px dashed #facc1560;
-        }
-        .wallet-status {
-            background: #22c55e30;
-            border: 1px solid #22c55e;
-            padding: 8px;
-            border-radius: 30px;
-            margin: 10px 0;
-            font-size: 0.9rem;
-        }
-        .footer { font-size: 0.75rem; opacity: 0.6; margin-top: 15px; }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BEE Кликер</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+        html, body { height: 100%; }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(145deg, #1e2a3a, #0f172a);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            color: white;
+        }
+        .app {
+            width: 400px;
+            max-width: 100%;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            padding-bottom: 80px;
+        }
+
+        /* ================= ВЕРХНЯЯ ПАНЕЛЬ ================= */
+        .top-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 14px 16px 8px;
+        }
+        .profile-bar {
+            display: flex; align-items: center; gap: 10px;
+            background: rgba(255,255,255,0.06);
+            border-radius: 30px; padding: 6px 14px 6px 6px; flex: 1; min-width: 0;
+        }
+        .avatar {
+            width: 38px; height: 38px; border-radius: 50%;
+            background: linear-gradient(145deg, #facc15, #b45309);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem; font-weight: bold; color: #0f172a; flex-shrink: 0; overflow: hidden;
+        }
+        .avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .profile-info { min-width: 0; }
+        .profile-name { font-size: 0.9rem; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .profile-level { font-size: 0.7rem; color: #facc15; opacity: 0.9; }
+
+        .token-pill {
+            display: flex; align-items: center; gap: 6px;
+            background: #1e293b; border: 1px solid #facc1550; border-radius: 30px;
+            padding: 6px 8px 6px 10px; cursor: pointer; flex-shrink: 0;
+        }
+        .token-pill .icon { width: 22px; height: 22px; border-radius: 50%; background: radial-gradient(circle, #ffe066, #b45309); display: flex; align-items: center; justify-content: center; font-size: 0.85rem; }
+        .token-pill .val { font-weight: bold; font-size: 0.95rem; }
+        .token-pill .plus { width: 20px; height: 20px; border-radius: 50%; background: #facc15; color: #0f172a; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.9rem; }
+
+        .tab-content { flex: 1; padding: 0 16px; }
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+
+        /* ================= ГЛАВНАЯ ================= */
+        .bee-stage { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px 0 4px; }
+        .balance-big { font-size: 2.6rem; font-weight: bold; margin-bottom: 2px; text-shadow: 0 0 20px #facc1560; }
+        .balance-label { font-size: 0.8rem; opacity: 0.6; margin-bottom: 10px; }
+
+        .bee-wrap { width: 220px; height: 220px; perspective: 900px; margin: 10px auto 6px; cursor: pointer; }
+        .bee-orbit { width: 100%; height: 100%; transform-style: preserve-3d; animation: beeOrbit 5s ease-in-out infinite; display: flex; align-items: center; justify-content: center; }
+        .bee-float {
+            width: 170px; height: 170px; border-radius: 50%;
+            background: radial-gradient(circle at 35% 30%, #fff6c8, #facc15 45%, #b45309 100%);
+            box-shadow: 0 0 50px #facc1580, inset 0 -10px 25px rgba(0,0,0,0.25);
+            display: flex; align-items: center; justify-content: center;
+            animation: beeBob 2.4s ease-in-out infinite; transform-style: preserve-3d; position: relative;
+        }
+        .bee-emoji { font-size: 5.5rem; filter: drop-shadow(0 8px 10px rgba(0,0,0,0.35)); animation: beeWiggle 1.2s ease-in-out infinite; }
+        .bee-wing { position: absolute; top: 28%; width: 34px; height: 22px; background: rgba(255,255,255,0.75); border-radius: 60%; box-shadow: 0 0 8px rgba(255,255,255,0.6); animation: wingFlap 0.18s ease-in-out infinite alternate; }
+        .bee-wing.left { left: 18%; transform-origin: right center; }
+        .bee-wing.right { right: 18%; transform-origin: left center; }
+        .bee-shadow { width: 110px; height: 18px; background: radial-gradient(ellipse, rgba(0,0,0,0.45), transparent 70%); margin: 6px auto 0; border-radius: 50%; animation: shadowPulse 2.4s ease-in-out infinite; }
+        .bee-wrap:active .bee-float { transform: scale(0.9); }
+
+        @keyframes beeOrbit { 0%{transform:rotateY(0deg);} 50%{transform:rotateY(22deg);} 100%{transform:rotateY(0deg);} }
+        @keyframes beeBob { 0%,100%{transform:translateY(0) rotateZ(-2deg);} 50%{transform:translateY(-16px) rotateZ(2deg);} }
+        @keyframes beeWiggle { 0%,100%{transform:rotate(-4deg);} 50%{transform:rotate(4deg);} }
+        @keyframes wingFlap { from{transform:scaleX(1) rotate(0deg);} to{transform:scaleX(0.4) rotate(-10deg);} }
+        @keyframes shadowPulse { 0%,100%{transform:scale(1);opacity:0.6;} 50%{transform:scale(0.75);opacity:0.35;} }
+        .tap-hint { font-size: 0.75rem; opacity: 0.5; margin-top: 4px; }
+
+        .stats { display: flex; justify-content: space-between; font-size: 1rem; background: #1e293b80; border-radius: 30px; padding: 12px 20px; margin: 14px 0; flex-wrap: wrap; gap: 6px; }
+        .upgrade-btn {
+            background: #facc15; color: #0f172a; border: none; padding: 12px 20px; border-radius: 40px;
+            font-weight: bold; font-size: 1.05rem; width: 100%; margin: 8px 0; cursor: pointer; box-shadow: 0 4px 0 #b45309;
+        }
+        .upgrade-btn:active { transform: translateY(4px); box-shadow: none; }
+        .upgrade-btn.secondary { background: #3b82f6; color: white; box-shadow: 0 4px 0 #1d4ed8; }
+        .upgrade-btn.ghost { background: transparent; border: 1px solid #facc1560; color: #facc15; box-shadow: none; }
+        .upgrade-btn:disabled { opacity: 0.45; box-shadow: none; transform: none; cursor: default; }
+
+        /* ================= МАГАЗИН (модалка) ================= */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: flex-end; justify-content: center; z-index: 50; }
+        .modal-overlay.open { display: flex; }
+        .modal-sheet { width: 400px; max-width: 100%; background: #16213a; border-radius: 30px 30px 0 0; padding: 20px 18px 28px; box-shadow: 0 -10px 40px rgba(0,0,0,0.6); max-height: 85vh; overflow-y: auto; }
+        .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+        .modal-title { font-size: 1.3rem; color: #facc15; font-weight: bold; }
+        .modal-close { width: 32px; height: 32px; border-radius: 50%; background: #1e293b; border: none; color: white; font-size: 1.1rem; cursor: pointer; }
+        .shop-pack { display: flex; align-items: center; justify-content: space-between; background: #1e293b80; border-radius: 20px; padding: 12px 14px; margin-bottom: 10px; border: 1px solid transparent; }
+        .shop-pack.popular { border-color: #facc1560; }
+        .shop-pack-info .amount { font-weight: bold; font-size: 1.05rem; }
+        .shop-pack-info .badge { font-size: 0.65rem; color: #0f172a; background: #facc15; padding: 1px 8px; border-radius: 10px; margin-left: 6px; font-weight: bold; }
+        .shop-pack-price { background: #facc15; color: #0f172a; border: none; padding: 8px 16px; border-radius: 30px; font-weight: bold; font-size: 0.9rem; cursor: pointer; box-shadow: 0 3px 0 #b45309; white-space: nowrap; }
+        .shop-pack-price:active { transform: translateY(3px); box-shadow: none; }
+        .sbp-note { display: flex; align-items: center; gap: 8px; font-size: 0.75rem; opacity: 0.7; margin-top: 12px; text-align: left; }
+
+        /* ================= НИЖНЯЯ НАВИГАЦИЯ ================= */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+            width: 400px; max-width: 100%; background: #131c2e; border-top: 1px solid rgba(255,255,255,0.08);
+            display: flex; justify-content: space-around; padding: 6px 2px calc(6px + env(safe-area-inset-bottom)); z-index: 40;
+        }
+        .nav-btn {
+            background: none; border: none; color: #8b95a7; display: flex; flex-direction: column; align-items: center; gap: 2px;
+            font-size: 0.58rem; padding: 5px 3px; cursor: pointer; border-radius: 12px; flex: 1; line-height: 1.1;
+        }
+        .nav-btn .nav-icon { font-size: 1.2rem; }
+        .nav-btn.active { color: #facc15; background: rgba(250,204,21,0.08); }
+
+        /* ================= ОБЩИЕ БЛОКИ ================= */
+        .section-title { font-size: 1.3rem; color: #facc15; margin: 16px 0 10px; }
+        .subtabs { display: flex; gap: 8px; margin-bottom: 14px; }
+        .subtab-btn { flex: 1; padding: 9px; border-radius: 20px; border: 1px solid #facc1540; background: transparent; color: #cbd5e1; font-weight: bold; font-size: 0.9rem; cursor: pointer; }
+        .subtab-btn.active { background: #facc15; color: #0f172a; border-color: #facc15; }
+        .subtab-panel { display: none; flex-direction: column; gap: 10px; }
+        .subtab-panel.active { display: flex; }
+
+        .task-item, .upg-item, .target-item { display: flex; align-items: center; justify-content: space-between; gap: 10px; background: #1e293b80; border-radius: 20px; padding: 12px 14px; }
+        .task-item.done { opacity: 0.5; }
+        .task-info, .upg-info, .target-info { flex: 1; min-width: 0; }
+        .task-title, .upg-title, .target-title { font-size: 0.95rem; font-weight: bold; display: flex; align-items: center; gap: 6px; }
+        .task-reward, .upg-desc, .target-sub { font-size: 0.78rem; color: #cbd5e1; margin-top: 2px; }
+        .upg-reward { font-size: 0.78rem; color: #facc15; margin-top: 2px; }
+        .task-btn, .upg-btn, .raid-btn {
+            background: #facc15; color: #0f172a; border: none; padding: 8px 14px; border-radius: 30px; font-weight: bold;
+            font-size: 0.85rem; cursor: pointer; box-shadow: 0 3px 0 #b45309; flex-shrink: 0; white-space: nowrap;
+        }
+        .task-btn:active, .upg-btn:active, .raid-btn:active { transform: translateY(3px); box-shadow: none; }
+        .task-btn.claimed { background: #22c55e; box-shadow: 0 3px 0 #15803d; cursor: default; }
+        .task-btn:disabled, .upg-btn:disabled, .raid-btn:disabled { opacity: 0.5; }
+        .lvl-badge { font-size: 0.65rem; background: #facc1530; color: #facc15; padding: 1px 8px; border-radius: 10px; }
+
+        .card { background: #1e293b80; border-radius: 24px; padding: 18px; margin-bottom: 14px; text-align: left; }
+        .card-title { font-weight: bold; margin-bottom: 8px; }
+        .wallet-status { background: #22c55e30; border: 1px solid #22c55e; padding: 10px; border-radius: 20px; margin-bottom: 12px; font-size: 0.9rem; }
+        .ref-link { background: #1e293b; padding: 12px; border-radius: 20px; font-size: 0.85rem; word-break: break-all; border: 1px dashed #facc1560; }
+        .copy-btn { margin-top: 10px; }
+        .ref-stats { display: flex; gap: 10px; margin-top: 12px; }
+        .ref-stat-box { flex: 1; background: #1e293b; border-radius: 16px; padding: 10px; text-align: center; }
+        .ref-stat-box .num { font-size: 1.3rem; font-weight: bold; color: #facc15; }
+        .ref-stat-box .lbl { font-size: 0.7rem; opacity: 0.7; }
+
+        /* ================= УЛЕЙ ================= */
+        .hive-summary {
+            display: flex; align-items: center; justify-content: space-between;
+            background: linear-gradient(135deg, #3d2c0f, #1e293b);
+            border: 1px solid #facc1550; border-radius: 24px; padding: 16px; margin-bottom: 14px;
+        }
+        .hive-honey-val { font-size: 1.6rem; font-weight: bold; color: #facc15; }
+        .hive-honey-lbl { font-size: 0.7rem; opacity: 0.7; }
+        .hive-collect-btn { background: #22c55e; color: white; box-shadow: 0 3px 0 #15803d; border: none; padding: 10px 18px; border-radius: 30px; font-weight: bold; cursor: pointer; }
+        .hive-collect-btn:active { transform: translateY(3px); box-shadow: none; }
+        .hive-cap-bar { width: 100%; height: 8px; background: #0f172a; border-radius: 8px; overflow: hidden; margin-top: 8px; }
+        .hive-cap-fill { height: 100%; background: linear-gradient(90deg, #facc15, #f59e0b); transition: width 0.3s; }
+
+        /* ================= КАРТА ================= */
+        .map-note { font-size: 0.75rem; opacity: 0.65; margin-bottom: 12px; }
+        .target-item.raided { opacity: 0.55; }
+        .defense-badge { font-size: 0.7rem; background: #ef444430; color: #f87171; padding: 1px 8px; border-radius: 10px; }
+        .honey-badge { font-size: 0.7rem; background: #facc1530; color: #facc15; padding: 1px 8px; border-radius: 10px; }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🐝 BEE</h1>
-        <div class="balance" id="balance">0</div>
-        <div style="font-size:0.8rem; opacity:0.7;">BEE токенов</div>
+<div class="app">
 
-        <div class="click-area" id="clickBtn">🍯</div>
+    <!-- ================= ВЕРХНЯЯ ПАНЕЛЬ ================= -->
+    <div class="top-bar">
+        <div class="profile-bar">
+            <div class="avatar" id="avatar">🐝</div>
+            <div class="profile-info">
+                <div class="profile-name" id="profileName">Загрузка...</div>
+                <div class="profile-level">Уровень: <span id="profileLevel">0</span></div>
+            </div>
+        </div>
+        <div class="token-pill" id="openShopBtn">
+            <span class="icon">🍯</span>
+            <span class="val" id="balanceTop">0</span>
+            <span class="plus">+</span>
+        </div>
+    </div>
 
-        <div class="stats">
-            <span>💰 за клик: <span id="perClick">1</span></span>
-            <span>⚡ кликов: <span id="totalClicks">0</span></span>
-        </div>
+    <div class="tab-content">
 
-        <button class="upgrade-btn" id="upgradeBtn">⬆ Улучшить (стоит: <span id="upgradeCost">10</span> BEE)</button>
-        <button class="upgrade-btn" id="autoBtn">🤖 Автокликер (стоит: <span id="autoCost">50</span> BEE)</button>
+        <!-- ================= ГЛАВНАЯ ================= -->
+        <div class="tab-panel active" id="tab-main">
+            <div class="bee-stage">
+                <div class="balance-big" id="balance">0</div>
+                <div class="balance-label">BEE токенов</div>
+                <div class="bee-wrap" id="clickBtn">
+                    <div class="bee-orbit">
+                        <div class="bee-float">
+                            <div class="bee-wing left"></div>
+                            <div class="bee-wing right"></div>
+                            <div class="bee-emoji">🐝</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bee-shadow"></div>
+                <div class="tap-hint">👆 нажимай на пчелу</div>
+            </div>
 
-        <div class="ref-link">
-            🔗 Ваша реферальная ссылка:<br>
-            <span id="refLink">загрузка...</span>
-        </div>
+            <div class="stats">
+                <span>💰 за клик: <span id="perClick">1</span></span>
+                <span>⚡ кликов: <span id="totalClicks">0</span></span>
+                <span>🗡 атака: <span id="statAttack">0</span></span>
+                <span>🎯 крит: <span id="statCrit">0</span>%</span>
+            </div>
 
-        <div class="wallet-status" id="walletStatus">
-            ⚡ Кошелёк не подключён
-        </div>
-        <button class="upgrade-btn" id="connectWallet" style="background:#3b82f6; color:white; box-shadow:0 4px 0 #1d4ed8;">
-            🔗 Подключить TON кошелёк
-        </button>
+            <button class="upgrade-btn" id="upgradeBtn">⬆ Улучшить (стоит: <span id="upgradeCost">10</span> BEE)</button>
+            <button class="upgrade-btn" id="autoBtn">🤖 Автокликер (стоит: <span id="autoCost">50</span> BEE)</button>
+            <button class="upgrade-btn ghost" id="openShopBtn2">🛒 Купить BEE за деньги</button>
+        </div>
 
-        <div class="footer">Telegram Mini App • BeraSig style</div>
-    </div>
+        <!-- ================= УЛЕЙ ================= -->
+        <div class="tab-panel" id="tab-hive">
+            <div class="section-title">🏠 Улей</div>
 
-    <script>
-        // -------- Игровая логика --------
-        let balance = parseInt(localStorage.getItem('beeBalance')) || 0;
-        let perClick = parseInt(localStorage.getItem('beePerClick')) || 1;
-        let totalClicks = parseInt(localStorage.getItem('beeTotalClicks')) || 0;
-        let upgradeLevel = parseInt(localStorage.getItem('beeUpgradeLevel')) || 0;
-        let autoActive = localStorage.getItem('beeAutoActive') === 'true';
-        let autoInterval = null;
+            <div class="hive-summary">
+                <div>
+                    <div class="hive-honey-val"><span id="hiveHoneyVal">0</span> / <span id="hiveCapVal">150</span></div>
+                    <div class="hive-honey-lbl">🍯 накоплено в улье</div>
+                    <div class="hive-cap-bar"><div class="hive-cap-fill" id="hiveCapFill" style="width:0%"></div></div>
+                </div>
+                <button class="hive-collect-btn" id="collectHiveBtn">Собрать</button>
+            </div>
 
-        // Стоимость улучшений
-        function getUpgradeCost() { return 10 + upgradeLevel * 8; }
-        function getAutoCost() { return 50 + (autoActive ? 0 : 0); } // можно сделать дороже при повторной покупке
+            <div class="subtabs">
+                <button class="subtab-btn active" data-hivetab="bee">Апгрейды пчелы</button>
+                <button class="subtab-btn" data-hivetab="building">Постройки улья</button>
+            </div>
+            <div class="subtab-panel active" id="hivetab-bee"></div>
+            <div class="subtab-panel" id="hivetab-building"></div>
+        </div>
 
-        // Обновить UI
-        function updateUI() {
-            document.getElementById('balance').textContent = balance;
-            document.getElementById('perClick').textContent = perClick;
-            document.getElementById('totalClicks').textContent = totalClicks;
-            document.getElementById('upgradeCost').textContent = getUpgradeCost();
-            document.getElementById('autoCost').textContent = getAutoCost();
-            // кнопка автокликера
-            document.getElementById('autoBtn').textContent = autoActive ? '✅ Автокликер активен' : '🤖 Автокликер (стоит: ' + getAutoCost() + ' BEE)';
-            // сохранение
-            localStorage.setItem('beeBalance', balance);
-            localStorage.setItem('beePerClick', perClick);
-            localStorage.setItem('beeTotalClicks', totalClicks);
-            localStorage.setItem('beeUpgradeLevel', upgradeLevel);
-            localStorage.setItem('beeAutoActive', autoActive);
-        }
+        <!-- ================= ЗАДАНИЯ ================= -->
+        <div class="tab-panel" id="tab-tasks">
+            <div class="section-title">📋 Задания</div>
+            <div class="subtabs">
+                <button class="subtab-btn active" data-subtab="daily">Ежедневные</button>
+                <button class="subtab-btn" data-subtab="weekly">Недельные</button>
+            </div>
+            <div class="subtab-panel active" id="subtab-daily"></div>
+            <div class="subtab-panel" id="subtab-weekly"></div>
+        </div>
 
-        // Клик
-        document.getElementById('clickBtn').addEventListener('click', function() {
-            balance += perClick;
-            totalClicks++;
-            updateUI();
-            // визуальный эффект
-            this.style.transform = 'scale(0.85)';
-            setTimeout(() => this.style.transform = '', 100);
-        });
+        <!-- ================= КАРТА МИРА ================= -->
+        <div class="tab-panel" id="tab-map">
+            <div class="section-title">🗺️ Карта мира</div>
+            <div class="map-note">Демо-режим: список ульев — локальные тестовые данные на этом устройстве. Для настоящей игры между реальными игроками нужен серверный backend, который хранит и синхронизирует ульи всех участников.</div>
+            <div id="targetsList" style="display:flex; flex-direction:column; gap:10px;"></div>
+        </div>
 
-        // Улучшение клика
-        document.getElementById('upgradeBtn').addEventListener('click', function() {
-            const cost = getUpgradeCost();
-            if (balance >= cost) {
-                balance -= cost;
-                perClick += 1;
-                upgradeLevel++;
-                updateUI();
-            } else {
-                alert('Не хватает BEE!');
-            }
-        });
+        <!-- ================= КОШЕЛЁК ================= -->
+        <div class="tab-panel" id="tab-wallet">
+            <div class="section-title">👛 Кошелёк</div>
+            <div class="card">
+                <div class="wallet-status" id="walletStatus">⚡ Кошелёк не подключён</div>
+                <button class="upgrade-btn secondary" id="connectWallet">🔗 Подключить TON кошелёк</button>
+            </div>
+        </div>
 
-        // Автокликер
-        document.getElementById('autoBtn').addEventListener('click', function() {
-            if (autoActive) {
-                alert('Автокликер уже работает!');
-                return;
-            }
-            const cost = getAutoCost();
-            if (balance >= cost) {
-                balance -= cost;
-                autoActive = true;
-                updateUI();
-                startAutoClick();
-            } else {
-                alert('Не хватает BEE!');
-            }
-        });
+        <!-- ================= РЕФЕРАЛЫ ================= -->
+        <div class="tab-panel" id="tab-ref">
+            <div class="section-title">🔗 Рефералы</div>
+            <div class="card">
+                <div class="card-title">Ваша реферальная ссылка</div>
+                <div class="ref-link" id="refLink">загрузка...</div>
+                <button class="upgrade-btn ghost copy-btn" id="copyRefBtn">📋 Скопировать ссылку</button>
+                <div class="ref-stats">
+                    <div class="ref-stat-box"><div class="num" id="refCount">0</div><div class="lbl">приглашено</div></div>
+                    <div class="ref-stat-box"><div class="num" id="refEarned">0</div><div class="lbl">заработано BEE</div></div>
+                </div>
+            </div>
+        </div>
 
-        function startAutoClick() {
-            if (autoInterval) clearInterval(autoInterval);
-            autoInterval = setInterval(() => {
-                balance += perClick;
-                totalClicks++;
-                updateUI();
-            }, 1000);
-        }
+    </div>
 
-        // При загрузке - если автокликер был активен, запускаем
-        if (autoActive) startAutoClick();
-        updateUI();
+    <!-- ================= МАГАЗИН (модалка) ================= -->
+    <div class="modal-overlay" id="shopModal">
+        <div class="modal-sheet">
+            <div class="modal-header">
+                <div class="modal-title">🛒 Магазин BEE</div>
+                <button class="modal-close" id="closeShopBtn">✕</button>
+            </div>
+            <div id="shopPacks"></div>
+            <div class="sbp-note">⚡ Оплата через Систему быстрых платежей (СБП) — мгновенное зачисление на карту любого банка.</div>
+        </div>
+    </div>
 
-        // -------- Реферальная ссылка (через Telegram) --------
-        function getRefLink() {
-            const tg = window.Telegram?.WebApp;
-            if (tg && tg.initDataUnsafe?.user) {
-                const userId = tg.initDataUnsafe.user.id;
-                const botUsername = 'ваш_бот_юзернейм'; // поменяйте на свой
-                return `https://t.me/${botUsername}?start=ref_${userId}`;
-            } else {
-                return 'Откройте через Telegram';
-            }
-        }
-        document.getElementById('refLink').textContent = getRefLink();
+    <!-- ================= НИЖНЯЯ НАВИГАЦИЯ ================= -->
+    <div class="bottom-nav">
+        <button class="nav-btn active" data-tab="main"><span class="nav-icon">🐝</span>Главная</button>
+        <button class="nav-btn" data-tab="hive"><span class="nav-icon">🏠</span>Улей</button>
+        <button class="nav-btn" data-tab="tasks"><span class="nav-icon">📋</span>Задания</button>
+        <button class="nav-btn" data-tab="map"><span class="nav-icon">🗺️</span>Карта</button>
+        <button class="nav-btn" data-tab="wallet"><span class="nav-icon">👛</span>Кошелёк</button>
+        <button class="nav-btn" data-tab="ref"><span class="nav-icon">🔗</span>Рефералы</button>
+    </div>
+</div>
 
-        // -------- Подключение TON кошелька (через TON Connect) --------
-        // Используем встроенный TON Wallet в Telegram (если есть)
-        async function connectTonWallet() {
-            try {
-                // Проверяем, есть ли TON в глобальном объекте (Telegram WebApp предоставляет TON)
-                const ton = window.Telegram?.WebApp?.TON;
-                if (!ton) {
-                    alert('Ваш кошелёк TON не обнаружен. Убедитесь, что вы открыли приложение через Telegram и у вас установлен TON Wallet.');
-                    return;
-                }
-                const address = await ton.connect();
-                document.getElementById('walletStatus').innerHTML = `✅ Кошелёк: ${address.slice(0,6)}...${address.slice(-4)}`;
-                // Здесь можно сохранить адрес и использовать для отправки BEE в будущем
-            } catch (e) {
-                alert('Ошибка подключения: ' + e.message);
-            }
-        }
-        document.getElementById('connectWallet').addEventListener('click', connectTonWallet);
+<script>
+    // ==================== СОСТОЯНИЕ ====================
+    let balance = parseInt(localStorage.getItem('beeBalance')) || 0;
+    let perClick = parseInt(localStorage.getItem('beePerClick')) || 1;
+    let totalClicks = parseInt(localStorage.getItem('beeTotalClicks')) || 0;
+    let upgradeLevel = parseInt(localStorage.getItem('beeUpgradeLevel')) || 0;
+    let autoActive = localStorage.getItem('beeAutoActive') === 'true';
+    let autoInterval = null;
+    let refCount = parseInt(localStorage.getItem('beeRefCount')) || 0;
+    let refEarned = parseInt(localStorage.getItem('beeRefEarned')) || 0;
 
-        // Если уже есть подключение - показываем (можно сохранить в localStorage)
-        // Для простоты оставим так.
+    // --- апгрейды пчелы ---
+    let critLevel = parseInt(localStorage.getItem('beeCritLevel')) || 0;
+    let attackLevel = parseInt(localStorage.getItem('beeAttackLevel')) || 0;
+    let wingLevel = parseInt(localStorage.getItem('beeWingLevel')) || 0;
 
-        // -------- Инициализация Telegram Mini App --------
-        if (window.Telegram && window.Telegram.WebApp) {
-            window.Telegram.WebApp.ready();
-            window.Telegram.WebApp.expand(); // развернуть на весь экран
-        }
-    </script>
+    // --- постройки улья ---
+    let honeycombLevel = parseInt(localStorage.getItem('beeHoneycombLevel')) || 0;
+    let warehouseLevel = parseInt(localStorage.getItem('beeWarehouseLevel')) || 0;
+    let hiveHoney = parseFloat(localStorage.getItem('beeHiveHoney')) || 0;
+    let lastPassiveTick = parseInt(localStorage.getItem('beeLastPassiveTick')) || Date.now();
+
+    function critChance() { return Math.min(50, critLevel * 3); }               // % шанс x3 награды
+    function hiveCap() { return 150 + warehouseLevel * 120; }                    // ёмкость улья
+    function honeyPerSec() { return honeycombLevel * 0.4; }                      // пассивный доход/сек
+
+    // ==================== АПГРЕЙДЫ ПЧЕЛЫ / ПОСТРОЙКИ ====================
+    const BEE_UPGRADES = [
+        {
+            id: 'power', title: '⚡ Сила укуса', icon: '⚡',
+            desc: () => `+1 BEE за клик (сейчас ${perClick})`,
+            level: () => upgradeLevel, cost: () => 10 + upgradeLevel * 8,
+            buy: () => { perClick += 1; upgradeLevel++; }
+        },
+        {
+            id: 'crit', title: '🎯 Критический удар', icon: '🎯',
+            desc: () => `Шанс x3 награды за клик: ${critChance()}%`,
+            level: () => critLevel, cost: () => 60 + critLevel * 35,
+            buy: () => { critLevel++; }, maxLevel: 16
+        },
+        {
+            id: 'attack', title: '🗡 Сила атаки', icon: '🗡',
+            desc: () => `Повышает шанс успеха при рейдах на карте (сейчас ${attackLevel * 3}%)`,
+            level: () => attackLevel, cost: () => 80 + attackLevel * 45,
+            buy: () => { attackLevel++; }
+        },
+        {
+            id: 'wing', title: '🌬 Скорость крыльев', icon: '🌬',
+            desc: () => `Ускоряет автокликер (интервал ${autoTickInterval()} мс)`,
+            level: () => wingLevel, cost: () => 100 + wingLevel * 60,
+            buy: () => { wingLevel++; if (autoActive) startAutoClick(); }, maxLevel: 8
+        }
+    ];
+
+    const HIVE_BUILDINGS = [
+        {
+            id: 'honeycomb', title: '🍯 Соты', icon: '🍯',
+            desc: () => `Пассивный доход: +${honeyPerSec().toFixed(1)} BEE/сек в улей`,
+            level: () => honeycombLevel, cost: () => 90 + honeycombLevel * 55,
+            buy: () => { honeycombLevel++; }
+        },
+        {
+            id: 'warehouse', title: '📦 Склад', icon: '📦',
+            desc: () => `Вместимость улья: ${hiveCap()} BEE`,
+            level: () => warehouseLevel, cost: () => 120 + warehouseLevel * 70,
+            buy: () => { warehouseLevel++; }
+        }
+    ];
+
+    function autoTickInterval() { return Math.max(250, 1000 - wingLevel * 90); }
+
+    function renderUpgradeList(list, containerId) {
+        const el = document.getElementById(containerId);
+        el.innerHTML = '';
+        list.forEach(u => {
+            const lvl = u.level();
+            const maxed = u.maxLevel && lvl >= u.maxLevel;
+            const cost = u.cost();
+            const item = document.createElement('div');
+            item.className = 'upg-item';
+            item.innerHTML = `
+                <div class="upg-info">
+                    <div class="upg-title">${u.title} <span class="lvl-badge">ур. ${lvl}</span></div>
+                    <div class="upg-desc">${u.desc()}</div>
+                </div>
+                <button class="upg-btn" data-upg="${u.id}" ${maxed ? 'disabled' : ''}>
+                    ${maxed ? 'MAX' : cost + ' 🍯'}
+                </button>`;
+            el.appendChild(item);
+        });
+        el.querySelectorAll('.upg-btn').forEach(btn => {
+            btn.addEventListener('click', () => buyUpgrade(btn.dataset.upg));
+        });
+    }
+    function buyUpgrade(id) {
+        const u = BEE_UPGRADES.find(x => x.id === id) || HIVE_BUILDINGS.find(x => x.id === id);
+        if (!u) return;
+        if (u.maxLevel && u.level() >= u.maxLevel) return;
+        const cost = u.cost();
+        if (balance < cost) { alert('Не хватает BEE!'); return; }
+        balance -= cost;
+        u.buy();
+        persistUpgrades();
+        updateUI();
+        renderHiveTabs();
+    }
+    function persistUpgrades() {
+        localStorage.setItem('beeCritLevel', critLevel);
+        localStorage.setItem('beeAttackLevel', attackLevel);
+        localStorage.setItem('beeWingLevel', wingLevel);
+        localStorage.setItem('beeHoneycombLevel', honeycombLevel);
+        localStorage.setItem('beeWarehouseLevel', warehouseLevel);
+    }
+    function renderHiveTabs() {
+        renderUpgradeList(BEE_UPGRADES, 'hivetab-bee');
+        renderUpgradeList(HIVE_BUILDINGS, 'hivetab-building');
+    }
+
+    document.querySelectorAll('.subtab-btn[data-hivetab]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('#tab-hive .subtab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('#tab-hive .subtab-panel').forEach(p => p.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById('hivetab-' + btn.dataset.hivetab).classList.add('active');
+        });
+    });
+
+    // ==================== ПАССИВНЫЙ ДОХОД УЛЬЯ ====================
+    function tickPassiveHoney() {
+        const now = Date.now();
+        const elapsedSec = Math.max(0, (now - lastPassiveTick) / 1000);
+        if (elapsedSec > 0) {
+            hiveHoney = Math.min(hiveCap(), hiveHoney + honeyPerSec() * elapsedSec);
+            lastPassiveTick = now;
+            localStorage.setItem('beeHiveHoney', hiveHoney);
+            localStorage.setItem('beeLastPassiveTick', lastPassiveTick);
+        }
+        document.getElementById('hiveHoneyVal').textContent = Math.floor(hiveHoney);
+        document.getElementById('hiveCapVal').textContent = hiveCap();
+        document.getElementById('hiveCapFill').style.width = Math.min(100, (hiveHoney / hiveCap()) * 100) + '%';
+    }
+    document.getElementById('collectHiveBtn').addEventListener('click', () => {
+        const amount = Math.floor(hiveHoney);
+        if (amount <= 0) { alert('В улье пока пусто — подождите или постройте больше сот.'); return; }
+        balance += amount;
+        hiveHoney = 0;
+        localStorage.setItem('beeHiveHoney', hiveHoney);
+        updateUI();
+        tickPassiveHoney();
+    });
+    setInterval(tickPassiveHoney, 1000);
+
+    // ==================== ЗАДАНИЯ ====================
+    const DAILY_TASKS = [
+        { id: 'daily_bonus', title: 'Ежедневный бонус', reward: 15, type: 'daily' },
+        { id: 'daily_10clicks', title: 'Сделать 10 кликов сегодня', reward: 10, type: 'daily' },
+        { id: 'daily_wallet_check', title: 'Зайти в раздел «Кошелёк»', reward: 5, type: 'daily' }
+    ];
+    const WEEKLY_TASKS = [
+        { id: 'weekly_subscribe', title: 'Подписаться на канал', reward: 50, url: 'https://t.me/your_channel', type: 'weekly' },
+        { id: 'weekly_invite3', title: 'Пригласить 3 друзей', reward: 100, action: 'showRef', type: 'weekly' },
+        { id: 'weekly_100clicks', title: 'Сделать 100 кликов за неделю', reward: 60, type: 'weekly' }
+    ];
+    let claimedTasks = JSON.parse(localStorage.getItem('beeClaimedTasks') || '[]');
+    let lastDailyReset = localStorage.getItem('beeLastDailyReset') || null;
+
+    function checkDailyReset() {
+        const now = new Date();
+        if (!lastDailyReset || (now - new Date(lastDailyReset)) >= 24 * 60 * 60 * 1000) {
+            claimedTasks = claimedTasks.filter(id => !DAILY_TASKS.some(t => t.id === id));
+            lastDailyReset = now.toISOString();
+            localStorage.setItem('beeLastDailyReset', lastDailyReset);
+            localStorage.setItem('beeClaimedTasks', JSON.stringify(claimedTasks));
+        }
+    }
+    function renderTaskGroup(tasks, containerId) {
+        const el = document.getElementById(containerId);
+        el.innerHTML = '';
+        tasks.forEach(task => {
+            const done = claimedTasks.includes(task.id);
+            const item = document.createElement('div');
+            item.className = 'task-item' + (done ? ' done' : '');
+            item.innerHTML = `
+                <div class="task-info">
+                    <div class="task-title">${task.title}</div>
+                    <div class="task-reward">+${task.reward} BEE</div>
+                </div>
+                <button class="task-btn ${done ? 'claimed' : ''}" data-task="${task.id}" ${done ? 'disabled' : ''}>
+                    ${done ? '✓ Готово' : 'Забрать'}
+                </button>`;
+            el.appendChild(item);
+        });
+        el.querySelectorAll('.task-btn').forEach(btn => btn.addEventListener('click', () => handleTaskClick(btn.dataset.task)));
+    }
+    function renderTasks() {
+        checkDailyReset();
+        renderTaskGroup(DAILY_TASKS, 'subtab-daily');
+        renderTaskGroup(WEEKLY_TASKS, 'subtab-weekly');
+    }
+    function handleTaskClick(taskId) {
+        const task = [...DAILY_TASKS, ...WEEKLY_TASKS].find(t => t.id === taskId);
+        if (!task || claimedTasks.includes(taskId)) return;
+        if (task.action === 'showRef') switchTab('ref');
+        else if (task.url) window.open(task.url, '_blank');
+        claimTask(taskId);
+    }
+    function claimTask(taskId) {
+        const task = [...DAILY_TASKS, ...WEEKLY_TASKS].find(t => t.id === taskId);
+        if (!task || claimedTasks.includes(taskId)) return;
+        balance += task.reward;
+        claimedTasks.push(taskId);
+        localStorage.setItem('beeClaimedTasks', JSON.stringify(claimedTasks));
+        updateUI(); renderTasks();
+    }
+    function claimTaskSilently(taskId) { if (!claimedTasks.includes(taskId)) claimTask(taskId); }
+    document.querySelectorAll('.subtab-btn[data-subtab]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('#tab-tasks .subtab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('#tab-tasks .subtab-panel').forEach(p => p.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById('subtab-' + btn.dataset.subtab).classList.add('active');
+        });
+    });
+
+    // ==================== КАРТА МИРА / РЕЙДЫ ====================
+    // Демо-данные "других игроков". В реальном проекте этот список должен
+    // приходить с backend-сервера, который хранит ульи всех игроков и
+    // синхронизирует их честно между устройствами.
+    const TARGET_SEED = [
+        { id: 't1', name: 'Улей Марины', level: 4, defense: 2, maxHoney: 220 },
+        { id: 't2', name: 'Улей Дмитрия', level: 7, defense: 5, maxHoney: 480 },
+        { id: 't3', name: 'Улей Алисы', level: 2, defense: 1, maxHoney: 120 },
+        { id: 't4', name: 'Улей Игоря', level: 9, defense: 7, maxHoney: 650 },
+        { id: 't5', name: 'Улей Насти', level: 5, defense: 3, maxHoney: 300 },
+        { id: 't6', name: 'Улей Романа', level: 12, defense: 10, maxHoney: 900 }
+    ];
+    const RAID_COOLDOWN_MS = 5 * 60 * 1000; // 5 минут
+
+    function loadTargetsState() {
+        const saved = JSON.parse(localStorage.getItem('beeTargets') || 'null');
+        if (saved) return saved;
+        const initial = TARGET_SEED.map(t => ({ ...t, honey: Math.round(t.maxHoney * 0.6), lastUpdate: Date.now(), lastRaid: 0 }));
+        localStorage.setItem('beeTargets', JSON.stringify(initial));
+        return initial;
+    }
+    let targets = loadTargetsState();
+    function saveTargets() { localStorage.setItem('beeTargets', JSON.stringify(targets)); }
+
+    function regenTargets() {
+        const now = Date.now();
+        targets.forEach(t => {
+            const elapsedH = (now - t.lastUpdate) / 3600000;
+            if (elapsedH > 0) {
+                t.honey = Math.min(t.maxHoney, t.honey + t.maxHoney * elapsedH); // полное восстановление за ~1 час
+                t.lastUpdate = now;
+            }
+        });
+        saveTargets();
+    }
+
+    function renderTargets() {
+        regenTargets();
+        const el = document.getElementById('targetsList');
+        el.innerHTML = '';
+        const now = Date.now();
+        targets.forEach(t => {
+            const onCooldown = (now - t.lastRaid) < RAID_COOLDOWN_MS;
+            const remainMin = Math.ceil((RAID_COOLDOWN_MS - (now - t.lastRaid)) / 60000);
+            const item = document.createElement('div');
+            item.className = 'target-item';
+            item.innerHTML = `
+                <div class="target-info">
+                    <div class="target-title">🏠 ${t.name} <span class="lvl-badge">ур. ${t.level}</span></div>
+                    <div class="target-sub">
+                        <span class="honey-badge">🍯 ${Math.floor(t.honey)}</span>
+                        <span class="defense-badge">🛡 ${t.defense}</span>
+                    </div>
+                </div>
+                <button class="raid-btn" data-target="${t.id}" ${onCooldown ? 'disabled' : ''}>
+                    ${onCooldown ? '⏳ ' + remainMin + ' мин' : '⚔ Грабить'}
+                </button>`;
+            el.appendChild(item);
+        });
+        el.querySelectorAll('.raid-btn').forEach(btn => {
+            btn.addEventListener('click', () => raidTarget(btn.dataset.target));
+        });
+    }
+
+    function raidTarget(id) {
+        const t = targets.find(x => x.id === id);
+        if (!t) return;
+        const now = Date.now();
+        if ((now - t.lastRaid) < RAID_COOLDOWN_MS) return;
+
+        const successChance = Math.max(15, Math.min(85, 45 + (attackLevel * 3 - t.defense * 4)));
+        const roll = Math.random() * 100;
+        t.lastRaid = now;
+
+        if (roll <= successChance) {
+            const stolen = Math.round(t.honey * (0.2 + Math.random() * 0.2));
+            t.honey = Math.max(0, t.honey - stolen);
+            balance += stolen;
+            alert(`Успех! Ваши пчёлы принесли ${stolen} 🍯 из улья «${t.name}».`);
+        } else {
+            alert(`Рейд не удался — стража улья «${t.name}» отбила атаку. Попробуйте позже.`);
+        }
+        saveTargets();
+        updateUI();
+        renderTargets();
+    }
+
+    // ==================== МАГАЗИН / ОПЛАТА СБП ====================
+    const SHOP_PACKS = [
+        { id: 'p1', amount: 100, price: 49 },
+        { id: 'p2', amount: 550, price: 199, badge: 'популярно' },
+        { id: 'p3', amount: 1200, price: 399 },
+        { id: 'p4', amount: 3000, price: 899, badge: 'выгодно' }
+    ];
+    function renderShop() {
+        const el = document.getElementById('shopPacks');
+        el.innerHTML = '';
+        SHOP_PACKS.forEach(pack => {
+            const div = document.createElement('div');
+            div.className = 'shop-pack' + (pack.badge === 'популярно' ? ' popular' : '');
+            div.innerHTML = `
+                <div class="shop-pack-info">
+                    <span class="amount">🍯 ${pack.amount} BEE</span>
+                    ${pack.badge ? `<span class="badge">${pack.badge}</span>` : ''}
+                </div>
+                <button class="shop-pack-price" data-pack="${pack.id}">${pack.price} ₽</button>`;
+            el.appendChild(div);
+        });
+        el.querySelectorAll('.shop-pack-price').forEach(btn => btn.addEventListener('click', () => payWithSBP(btn.dataset.pack)));
+    }
+    function openShop() { document.getElementById('shopModal').classList.add('open'); renderShop(); }
+    function closeShop() { document.getElementById('shopModal').classList.remove('open'); }
+    document.getElementById('openShopBtn').addEventListener('click', openShop);
+    document.getElementById('openShopBtn2').addEventListener('click', openShop);
+    document.getElementById('closeShopBtn').addEventListener('click', closeShop);
+    document.getElementById('shopModal').addEventListener('click', e => { if (e.target.id === 'shopModal') closeShop(); });
+
+    // Заглушка оплаты через СБП. Реальное списание денег и зачисление BEE
+    // должно подтверждаться ТОЛЬКО вашим backend-сервером после webhook от
+    // платёжного провайдера — нельзя начислять токены напрямую на клиенте.
+    async function payWithSBP(packId) {
+        const pack = SHOP_PACKS.find(p => p.id === packId);
+        if (!pack) return;
+        alert(
+            `Оплата через СБП пока не подключена.\n\n` +
+            `Пакет: ${pack.amount} BEE за ${pack.price} ₽.\n` +
+            `Чтобы включить реальные платежи, подключите backend и платёжного ` +
+            `провайдера с поддержкой СБП (например, ЮKassa, Т-Банк Эквайринг, ` +
+            `CloudPayments) — зачисление токенов должно происходить только после ` +
+            `подтверждения оплаты сервером.`
+        );
+    }
+
+    // ==================== НИЖНЯЯ НАВИГАЦИЯ ====================
+    document.querySelectorAll('.nav-btn').forEach(btn => btn.addEventListener('click', () => switchTab(btn.dataset.tab)));
+    function switchTab(tab) {
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('tab-' + tab).classList.add('active');
+        document.querySelector(`.nav-btn[data-tab="${tab}"]`).classList.add('active');
+        if (tab === 'wallet') claimTaskSilently('daily_wallet_check');
+        if (tab === 'tasks') renderTasks();
+        if (tab === 'hive') { renderHiveTabs(); tickPassiveHoney(); }
+        if (tab === 'map') renderTargets();
+    }
+
+    // ==================== ОСНОВНЫЕ ДЕЙСТВИЯ ====================
+    function updateUI() {
+        document.getElementById('balance').textContent = Math.floor(balance);
+        document.getElementById('balanceTop').textContent = Math.floor(balance);
+        document.getElementById('perClick').textContent = perClick;
+        document.getElementById('totalClicks').textContent = totalClicks;
+        document.getElementById('upgradeCost').textContent = getUpgradeCost();
+        document.getElementById('autoCost').textContent = getAutoCost();
+        document.getElementById('profileLevel').textContent = upgradeLevel;
+        document.getElementById('autoBtn').textContent = autoActive ? '✅ Автокликер активен' : '🤖 Автокликер (стоит: ' + getAutoCost() + ' BEE)';
+        document.getElementById('refCount').textContent = refCount;
+        document.getElementById('refEarned').textContent = refEarned;
+        document.getElementById('statAttack').textContent = attackLevel * 3 + '%';
+        document.getElementById('statCrit').textContent = critChance();
+
+        localStorage.setItem('beeBalance', balance);
+        localStorage.setItem('beePerClick', perClick);
+        localStorage.setItem('beeTotalClicks', totalClicks);
+        localStorage.setItem('beeUpgradeLevel', upgradeLevel);
+        localStorage.setItem('beeAutoActive', autoActive);
+        localStorage.setItem('beeRefCount', refCount);
+        localStorage.setItem('beeRefEarned', refEarned);
+    }
+    function getUpgradeCost() { return 10 + upgradeLevel * 8; }
+    function getAutoCost() { return 50; }
+
+    document.getElementById('clickBtn').addEventListener('click', function() {
+        let gain = perClick;
+        if (Math.random() * 100 < critChance()) { gain *= 3; }
+        balance += gain;
+        totalClicks++;
+        claimTaskSilently('daily_10clicks');
+        updateUI();
+    });
+    document.getElementById('upgradeBtn').addEventListener('click', function() {
+        const cost = getUpgradeCost();
+        if (balance >= cost) { balance -= cost; perClick += 1; upgradeLevel++; updateUI(); }
+        else alert('Не хватает BEE!');
+    });
+    document.getElementById('autoBtn').addEventListener('click', function() {
+        if (autoActive) { alert('Автокликер уже работает!'); return; }
+        const cost = getAutoCost();
+        if (balance >= cost) { balance -= cost; autoActive = true; updateUI(); startAutoClick(); }
+        else alert('Не хватает BEE!');
+    });
+    function startAutoClick() {
+        if (autoInterval) clearInterval(autoInterval);
+        autoInterval = setInterval(() => { balance += perClick; totalClicks++; updateUI(); }, autoTickInterval());
+    }
+    if (autoActive) startAutoClick();
+
+    // ==================== ПРОФИЛЬ ====================
+    function initProfile() {
+        const tg = window.Telegram?.WebApp;
+        const user = tg?.initDataUnsafe?.user;
+        const nameEl = document.getElementById('profileName');
+        const avatarEl = document.getElementById('avatar');
+        if (user) {
+            const fullName = [user.first_name, user.last_name].filter(Boolean).join(' ');
+            nameEl.textContent = fullName || (user.username ? '@' + user.username : 'Игрок');
+            if (user.photo_url) avatarEl.innerHTML = `<img src="${user.photo_url}" alt="avatar">`;
+            else avatarEl.textContent = (user.first_name || 'B')[0].toUpperCase();
+        } else {
+            nameEl.textContent = 'Гость';
+            avatarEl.textContent = '🐝';
+        }
+    }
+
+    // ==================== РЕФЕРАЛЬНАЯ ССЫЛКА ====================
+    function getRefLink() {
+        const tg = window.Telegram?.WebApp;
+        if (tg && tg.initDataUnsafe?.user) {
+            const userId = tg.initDataUnsafe.user.id;
+            const botUsername = 'ваш_бот_юзернейм';
+            return `https://t.me/${botUsername}?start=ref_${userId}`;
+        }
+        return 'Откройте через Telegram, чтобы получить ссылку';
+    }
+    document.getElementById('refLink').textContent = getRefLink();
+    document.getElementById('copyRefBtn').addEventListener('click', () => {
+        const text = document.getElementById('refLink').textContent;
+        navigator.clipboard?.writeText(text).then(() => alert('Ссылка скопирована!')).catch(() => {});
+    });
+
+    // ==================== TON КОШЕЛЁК ====================
+    async function connectTonWallet() {
+        try {
+            const ton = window.Telegram?.WebApp?.TON;
+            if (!ton) { alert('Ваш кошелёк TON не обнаружен. Откройте приложение через Telegram с установленным TON Wallet.'); return; }
+            const address = await ton.connect();
+            document.getElementById('walletStatus').innerHTML = `✅ Кошелёк: ${address.slice(0,6)}...${address.slice(-4)}`;
+            localStorage.setItem('beeWalletConnected', 'true');
+        } catch (e) { alert('Ошибка подключения: ' + e.message); }
+    }
+    document.getElementById('connectWallet').addEventListener('click', connectTonWallet);
+
+    // ==================== ИНИЦИАЛИЗАЦИЯ TELEGRAM MINI APP ====================
+    if (window.Telegram && window.Telegram.WebApp) {
+        window.Telegram.WebApp.ready();
+        window.Telegram.WebApp.expand();
+    }
+
+    // ==================== ЗАПУСК ====================
+    initProfile();
+    checkDailyReset();
+    renderTasks();
+    renderHiveTabs();
+    tickPassiveHoney();
+    updateUI();
+</script>
 </body>
 </html>
