@@ -320,6 +320,10 @@
 </div>
 
 <script>
+    // ==================== НАСТРОЙКИ ====================
+    // !!! ЗАМЕНИТЕ НА РЕАЛЬНОЕ ИМЯ ВАШЕГО БОТА (без @) !!!
+    const BOT_USERNAME = 'YourBotUsername'; 
+
     // ==================== СОСТОЯНИЕ ====================
     let balance = parseInt(localStorage.getItem('beeBalance')) || 0;
     let perClick = parseInt(localStorage.getItem('beePerClick')) || 1;
@@ -341,11 +345,18 @@
     let hiveHoney = parseFloat(localStorage.getItem('beeHiveHoney')) || 0;
     let lastPassiveTick = parseInt(localStorage.getItem('beeLastPassiveTick')) || Date.now();
 
-    function critChance() { return Math.min(50, critLevel * 3); }               // % шанс x3 награды
-    function hiveCap() { return 150 + warehouseLevel * 120; }                    // ёмкость улья
-    function honeyPerSec() { return honeycombLevel * 0.4; }                      // пассивный доход/сек
+    // --- задания ---
+    let claimedTasks = JSON.parse(localStorage.getItem('beeClaimedTasks') || '[]');
+    let lastDailyReset = localStorage.getItem('beeLastDailyReset') || null;
+    let lastWeeklyReset = localStorage.getItem('beeLastWeeklyReset') || null;
 
-    // ==================== АПГРЕЙДЫ ПЧЕЛЫ / ПОСТРОЙКИ ====================
+    // ==================== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ====================
+    function critChance() { return Math.min(50, critLevel * 3); }
+    function hiveCap() { return 150 + warehouseLevel * 120; }
+    function honeyPerSec() { return honeycombLevel * 0.4; }
+    function autoTickInterval() { return Math.max(250, 1000 - wingLevel * 90); }
+
+    // ==================== АПГРЕЙДЫ ====================
     const BEE_UPGRADES = [
         {
             id: 'power', title: '⚡ Сила укуса', icon: '⚡',
@@ -388,10 +399,9 @@
         }
     ];
 
-    function autoTickInterval() { return Math.max(250, 1000 - wingLevel * 90); }
-
     function renderUpgradeList(list, containerId) {
         const el = document.getElementById(containerId);
+        if (!el) return;
         el.innerHTML = '';
         list.forEach(u => {
             const lvl = u.level();
@@ -413,6 +423,7 @@
             btn.addEventListener('click', () => buyUpgrade(btn.dataset.upg));
         });
     }
+
     function buyUpgrade(id) {
         const u = BEE_UPGRADES.find(x => x.id === id) || HIVE_BUILDINGS.find(x => x.id === id);
         if (!u) return;
@@ -425,6 +436,7 @@
         updateUI();
         renderHiveTabs();
     }
+
     function persistUpgrades() {
         localStorage.setItem('beeCritLevel', critLevel);
         localStorage.setItem('beeAttackLevel', attackLevel);
@@ -432,6 +444,7 @@
         localStorage.setItem('beeHoneycombLevel', honeycombLevel);
         localStorage.setItem('beeWarehouseLevel', warehouseLevel);
     }
+
     function renderHiveTabs() {
         renderUpgradeList(BEE_UPGRADES, 'hivetab-bee');
         renderUpgradeList(HIVE_BUILDINGS, 'hivetab-building');
@@ -460,6 +473,7 @@
         document.getElementById('hiveCapVal').textContent = hiveCap();
         document.getElementById('hiveCapFill').style.width = Math.min(100, (hiveHoney / hiveCap()) * 100) + '%';
     }
+
     document.getElementById('collectHiveBtn').addEventListener('click', () => {
         const amount = Math.floor(hiveHoney);
         if (amount <= 0) { alert('В улье пока пусто — подождите или постройте больше сот.'); return; }
@@ -467,8 +481,9 @@
         hiveHoney = 0;
         localStorage.setItem('beeHiveHoney', hiveHoney);
         updateUI();
-        tickPassiveHoney();
+        tickPassiveHoney(); // сразу обновить
     });
+
     setInterval(tickPassiveHoney, 1000);
 
     // ==================== ЗАДАНИЯ ====================
@@ -482,8 +497,6 @@
         { id: 'weekly_invite3', title: 'Пригласить 3 друзей', reward: 100, action: 'showRef', type: 'weekly' },
         { id: 'weekly_100clicks', title: 'Сделать 100 кликов за неделю', reward: 60, type: 'weekly' }
     ];
-    let claimedTasks = JSON.parse(localStorage.getItem('beeClaimedTasks') || '[]');
-    let lastDailyReset = localStorage.getItem('beeLastDailyReset') || null;
 
     function checkDailyReset() {
         const now = new Date();
@@ -494,8 +507,20 @@
             localStorage.setItem('beeClaimedTasks', JSON.stringify(claimedTasks));
         }
     }
+
+    function checkWeeklyReset() {
+        const now = new Date();
+        if (!lastWeeklyReset || (now - new Date(lastWeeklyReset)) >= 7 * 24 * 60 * 60 * 1000) {
+            claimedTasks = claimedTasks.filter(id => !WEEKLY_TASKS.some(t => t.id === id));
+            lastWeeklyReset = now.toISOString();
+            localStorage.setItem('beeLastWeeklyReset', lastWeeklyReset);
+            localStorage.setItem('beeClaimedTasks', JSON.stringify(claimedTasks));
+        }
+    }
+
     function renderTaskGroup(tasks, containerId) {
         const el = document.getElementById(containerId);
+        if (!el) return;
         el.innerHTML = '';
         tasks.forEach(task => {
             const done = claimedTasks.includes(task.id);
@@ -513,11 +538,14 @@
         });
         el.querySelectorAll('.task-btn').forEach(btn => btn.addEventListener('click', () => handleTaskClick(btn.dataset.task)));
     }
+
     function renderTasks() {
         checkDailyReset();
+        checkWeeklyReset();
         renderTaskGroup(DAILY_TASKS, 'subtab-daily');
         renderTaskGroup(WEEKLY_TASKS, 'subtab-weekly');
     }
+
     function handleTaskClick(taskId) {
         const task = [...DAILY_TASKS, ...WEEKLY_TASKS].find(t => t.id === taskId);
         if (!task || claimedTasks.includes(taskId)) return;
@@ -525,15 +553,21 @@
         else if (task.url) window.open(task.url, '_blank');
         claimTask(taskId);
     }
+
     function claimTask(taskId) {
         const task = [...DAILY_TASKS, ...WEEKLY_TASKS].find(t => t.id === taskId);
         if (!task || claimedTasks.includes(taskId)) return;
         balance += task.reward;
         claimedTasks.push(taskId);
         localStorage.setItem('beeClaimedTasks', JSON.stringify(claimedTasks));
-        updateUI(); renderTasks();
+        updateUI();
+        renderTasks();
     }
-    function claimTaskSilently(taskId) { if (!claimedTasks.includes(taskId)) claimTask(taskId); }
+
+    function claimTaskSilently(taskId) {
+        if (!claimedTasks.includes(taskId)) claimTask(taskId);
+    }
+
     document.querySelectorAll('.subtab-btn[data-subtab]').forEach(btn => {
         btn.addEventListener('click', () => {
             document.querySelectorAll('#tab-tasks .subtab-btn').forEach(b => b.classList.remove('active'));
@@ -544,9 +578,6 @@
     });
 
     // ==================== КАРТА МИРА / РЕЙДЫ ====================
-    // Демо-данные "других игроков". В реальном проекте этот список должен
-    // приходить с backend-сервера, который хранит ульи всех игроков и
-    // синхронизирует их честно между устройствами.
     const TARGET_SEED = [
         { id: 't1', name: 'Улей Марины', level: 4, defense: 2, maxHoney: 220 },
         { id: 't2', name: 'Улей Дмитрия', level: 7, defense: 5, maxHoney: 480 },
@@ -565,6 +596,7 @@
         return initial;
     }
     let targets = loadTargetsState();
+
     function saveTargets() { localStorage.setItem('beeTargets', JSON.stringify(targets)); }
 
     function regenTargets() {
@@ -572,7 +604,7 @@
         targets.forEach(t => {
             const elapsedH = (now - t.lastUpdate) / 3600000;
             if (elapsedH > 0) {
-                t.honey = Math.min(t.maxHoney, t.honey + t.maxHoney * elapsedH); // полное восстановление за ~1 час
+                t.honey = Math.min(t.maxHoney, t.honey + t.maxHoney * elapsedH * 0.2); // 20% в час
                 t.lastUpdate = now;
             }
         });
@@ -582,6 +614,7 @@
     function renderTargets() {
         regenTargets();
         const el = document.getElementById('targetsList');
+        if (!el) return;
         el.innerHTML = '';
         const now = Date.now();
         targets.forEach(t => {
@@ -637,8 +670,10 @@
         { id: 'p3', amount: 1200, price: 399 },
         { id: 'p4', amount: 3000, price: 899, badge: 'выгодно' }
     ];
+
     function renderShop() {
         const el = document.getElementById('shopPacks');
+        if (!el) return;
         el.innerHTML = '';
         SHOP_PACKS.forEach(pack => {
             const div = document.createElement('div');
@@ -653,6 +688,7 @@
         });
         el.querySelectorAll('.shop-pack-price').forEach(btn => btn.addEventListener('click', () => payWithSBP(btn.dataset.pack)));
     }
+
     function openShop() { document.getElementById('shopModal').classList.add('open'); renderShop(); }
     function closeShop() { document.getElementById('shopModal').classList.remove('open'); }
     document.getElementById('openShopBtn').addEventListener('click', openShop);
@@ -660,9 +696,7 @@
     document.getElementById('closeShopBtn').addEventListener('click', closeShop);
     document.getElementById('shopModal').addEventListener('click', e => { if (e.target.id === 'shopModal') closeShop(); });
 
-    // Заглушка оплаты через СБП. Реальное списание денег и зачисление BEE
-    // должно подтверждаться ТОЛЬКО вашим backend-сервером после webhook от
-    // платёжного провайдера — нельзя начислять токены напрямую на клиенте.
+    // Заглушка оплаты через СБП.
     async function payWithSBP(packId) {
         const pack = SHOP_PACKS.find(p => p.id === packId);
         if (!pack) return;
@@ -678,11 +712,13 @@
 
     // ==================== НИЖНЯЯ НАВИГАЦИЯ ====================
     document.querySelectorAll('.nav-btn').forEach(btn => btn.addEventListener('click', () => switchTab(btn.dataset.tab)));
+
     function switchTab(tab) {
         document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
         document.getElementById('tab-' + tab).classList.add('active');
         document.querySelector(`.nav-btn[data-tab="${tab}"]`).classList.add('active');
+        // Обновляем содержимое вкладок при переключении
         if (tab === 'wallet') claimTaskSilently('daily_wallet_check');
         if (tab === 'tasks') renderTasks();
         if (tab === 'hive') { renderHiveTabs(); tickPassiveHoney(); }
@@ -712,6 +748,7 @@
         localStorage.setItem('beeRefCount', refCount);
         localStorage.setItem('beeRefEarned', refEarned);
     }
+
     function getUpgradeCost() { return 10 + upgradeLevel * 8; }
     function getAutoCost() { return 50; }
 
@@ -723,17 +760,20 @@
         claimTaskSilently('daily_10clicks');
         updateUI();
     });
+
     document.getElementById('upgradeBtn').addEventListener('click', function() {
         const cost = getUpgradeCost();
         if (balance >= cost) { balance -= cost; perClick += 1; upgradeLevel++; updateUI(); }
         else alert('Не хватает BEE!');
     });
+
     document.getElementById('autoBtn').addEventListener('click', function() {
         if (autoActive) { alert('Автокликер уже работает!'); return; }
         const cost = getAutoCost();
         if (balance >= cost) { balance -= cost; autoActive = true; updateUI(); startAutoClick(); }
         else alert('Не хватает BEE!');
     });
+
     function startAutoClick() {
         if (autoInterval) clearInterval(autoInterval);
         autoInterval = setInterval(() => { balance += perClick; totalClicks++; updateUI(); }, autoTickInterval());
@@ -762,8 +802,7 @@
         const tg = window.Telegram?.WebApp;
         if (tg && tg.initDataUnsafe?.user) {
             const userId = tg.initDataUnsafe.user.id;
-            const botUsername = 'ваш_бот_юзернейм';
-            return `https://t.me/${botUsername}?start=ref_${userId}`;
+            return `https://t.me/${BOT_USERNAME}?start=ref_${userId}`;
         }
         return 'Откройте через Telegram, чтобы получить ссылку';
     }
@@ -776,12 +815,16 @@
     // ==================== TON КОШЕЛЁК ====================
     async function connectTonWallet() {
         try {
-            const ton = window.Telegram?.WebApp?.TON;
-            if (!ton) { alert('Ваш кошелёк TON не обнаружен. Откройте приложение через Telegram с установленным TON Wallet.'); return; }
-            const address = await ton.connect();
+            if (!window.Telegram?.WebApp?.TON) {
+                alert('Ваш кошелёк TON не обнаружен. Откройте приложение через Telegram с установленным TON Wallet.');
+                return;
+            }
+            const address = await window.Telegram.WebApp.TON.connect();
             document.getElementById('walletStatus').innerHTML = `✅ Кошелёк: ${address.slice(0,6)}...${address.slice(-4)}`;
             localStorage.setItem('beeWalletConnected', 'true');
-        } catch (e) { alert('Ошибка подключения: ' + e.message); }
+        } catch (e) {
+            alert('Ошибка подключения: ' + e.message);
+        }
     }
     document.getElementById('connectWallet').addEventListener('click', connectTonWallet);
 
@@ -794,6 +837,7 @@
     // ==================== ЗАПУСК ====================
     initProfile();
     checkDailyReset();
+    checkWeeklyReset();
     renderTasks();
     renderHiveTabs();
     tickPassiveHoney();
