@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BEE Кликер</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(145deg, #1e2a3a, #0f172a);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+        .container {
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(10px);
+            padding: 30px 20px;
+            border-radius: 40px;
+            width: 360px;
+            max-width: 98%;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+            border: 1px solid rgba(255,215,0,0.2);
+        }
+        h1 { font-size: 2.2rem; color: #facc15; text-shadow: 0 0 20px #facc1550; }
+        .balance {
+            font-size: 2.8rem;
+            font-weight: bold;
+            margin: 15px 0 5px;
+            background: #1e293b;
+            padding: 10px 20px;
+            border-radius: 60px;
+            display: inline-block;
+            border: 1px solid #facc1540;
+        }
+        .click-area {
+            width: 200px;
+            height: 200px;
+            margin: 20px auto;
+            background: radial-gradient(circle, #facc15, #b45309);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 4rem;
+            cursor: pointer;
+            box-shadow: 0 0 40px #facc1570;
+            transition: transform 0.1s;
+            color: #0f172a;
+            font-weight: bold;
+            text-shadow: 0 2px 10px rgba(255,255,255,0.5);
+        }
+        .click-area:active { transform: scale(0.92); }
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            font-size: 1.1rem;
+            background: #1e293b80;
+            border-radius: 30px;
+            padding: 12px 20px;
+            margin: 15px 0;
+        }
+        .upgrade-btn {
+            background: #facc15;
+            color: #0f172a;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 40px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            width: 100%;
+            margin: 8px 0;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 4px 0 #b45309;
+        }
+        .upgrade-btn:active { transform: translateY(4px); box-shadow: none; }
+        .upgrade-btn:disabled { opacity: 0.4; transform: none; box-shadow: 0 4px 0 #b45309; }
+        .ref-link {
+            background: #1e293b;
+            padding: 10px;
+            border-radius: 30px;
+            margin: 15px 0;
+            font-size: 0.9rem;
+            word-break: break-all;
+            border: 1px dashed #facc1560;
+        }
+        .wallet-status {
+            background: #22c55e30;
+            border: 1px solid #22c55e;
+            padding: 8px;
+            border-radius: 30px;
+            margin: 10px 0;
+            font-size: 0.9rem;
+        }
+        .footer { font-size: 0.75rem; opacity: 0.6; margin-top: 15px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🐝 BEE</h1>
+        <div class="balance" id="balance">0</div>
+        <div style="font-size:0.8rem; opacity:0.7;">BEE токенов</div>
+
+        <div class="click-area" id="clickBtn">🍯</div>
+
+        <div class="stats">
+            <span>💰 за клик: <span id="perClick">1</span></span>
+            <span>⚡ кликов: <span id="totalClicks">0</span></span>
+        </div>
+
+        <button class="upgrade-btn" id="upgradeBtn">⬆ Улучшить (стоит: <span id="upgradeCost">10</span> BEE)</button>
+        <button class="upgrade-btn" id="autoBtn">🤖 Автокликер (стоит: <span id="autoCost">50</span> BEE)</button>
+
+        <div class="ref-link">
+            🔗 Ваша реферальная ссылка:<br>
+            <span id="refLink">загрузка...</span>
+        </div>
+
+        <div class="wallet-status" id="walletStatus">
+            ⚡ Кошелёк не подключён
+        </div>
+        <button class="upgrade-btn" id="connectWallet" style="background:#3b82f6; color:white; box-shadow:0 4px 0 #1d4ed8;">
+            🔗 Подключить TON кошелёк
+        </button>
+
+        <div class="footer">Telegram Mini App • BeraSig style</div>
+    </div>
+
+    <script>
+        // -------- Игровая логика --------
+        let balance = parseInt(localStorage.getItem('beeBalance')) || 0;
+        let perClick = parseInt(localStorage.getItem('beePerClick')) || 1;
+        let totalClicks = parseInt(localStorage.getItem('beeTotalClicks')) || 0;
+        let upgradeLevel = parseInt(localStorage.getItem('beeUpgradeLevel')) || 0;
+        let autoActive = localStorage.getItem('beeAutoActive') === 'true';
+        let autoInterval = null;
+
+        // Стоимость улучшений
+        function getUpgradeCost() { return 10 + upgradeLevel * 8; }
+        function getAutoCost() { return 50 + (autoActive ? 0 : 0); } // можно сделать дороже при повторной покупке
+
+        // Обновить UI
+        function updateUI() {
+            document.getElementById('balance').textContent = balance;
+            document.getElementById('perClick').textContent = perClick;
+            document.getElementById('totalClicks').textContent = totalClicks;
+            document.getElementById('upgradeCost').textContent = getUpgradeCost();
+            document.getElementById('autoCost').textContent = getAutoCost();
+            // кнопка автокликера
+            document.getElementById('autoBtn').textContent = autoActive ? '✅ Автокликер активен' : '🤖 Автокликер (стоит: ' + getAutoCost() + ' BEE)';
+            // сохранение
+            localStorage.setItem('beeBalance', balance);
+            localStorage.setItem('beePerClick', perClick);
+            localStorage.setItem('beeTotalClicks', totalClicks);
+            localStorage.setItem('beeUpgradeLevel', upgradeLevel);
+            localStorage.setItem('beeAutoActive', autoActive);
+        }
+
+        // Клик
+        document.getElementById('clickBtn').addEventListener('click', function() {
+            balance += perClick;
+            totalClicks++;
+            updateUI();
+            // визуальный эффект
+            this.style.transform = 'scale(0.85)';
+            setTimeout(() => this.style.transform = '', 100);
+        });
+
+        // Улучшение клика
+        document.getElementById('upgradeBtn').addEventListener('click', function() {
+            const cost = getUpgradeCost();
+            if (balance >= cost) {
+                balance -= cost;
+                perClick += 1;
+                upgradeLevel++;
+                updateUI();
+            } else {
+                alert('Не хватает BEE!');
+            }
+        });
+
+        // Автокликер
+        document.getElementById('autoBtn').addEventListener('click', function() {
+            if (autoActive) {
+                alert('Автокликер уже работает!');
+                return;
+            }
+            const cost = getAutoCost();
+            if (balance >= cost) {
+                balance -= cost;
+                autoActive = true;
+                updateUI();
+                startAutoClick();
+            } else {
+                alert('Не хватает BEE!');
+            }
+        });
+
+        function startAutoClick() {
+            if (autoInterval) clearInterval(autoInterval);
+            autoInterval = setInterval(() => {
+                balance += perClick;
+                totalClicks++;
+                updateUI();
+            }, 1000);
+        }
+
+        // При загрузке - если автокликер был активен, запускаем
+        if (autoActive) startAutoClick();
+        updateUI();
+
+        // -------- Реферальная ссылка (через Telegram) --------
+        function getRefLink() {
+            const tg = window.Telegram?.WebApp;
+            if (tg && tg.initDataUnsafe?.user) {
+                const userId = tg.initDataUnsafe.user.id;
+                const botUsername = 'ваш_бот_юзернейм'; // поменяйте на свой
+                return `https://t.me/${botUsername}?start=ref_${userId}`;
+            } else {
+                return 'Откройте через Telegram';
+            }
+        }
+        document.getElementById('refLink').textContent = getRefLink();
+
+        // -------- Подключение TON кошелька (через TON Connect) --------
+        // Используем встроенный TON Wallet в Telegram (если есть)
+        async function connectTonWallet() {
+            try {
+                // Проверяем, есть ли TON в глобальном объекте (Telegram WebApp предоставляет TON)
+                const ton = window.Telegram?.WebApp?.TON;
+                if (!ton) {
+                    alert('Ваш кошелёк TON не обнаружен. Убедитесь, что вы открыли приложение через Telegram и у вас установлен TON Wallet.');
+                    return;
+                }
+                const address = await ton.connect();
+                document.getElementById('walletStatus').innerHTML = `✅ Кошелёк: ${address.slice(0,6)}...${address.slice(-4)}`;
+                // Здесь можно сохранить адрес и использовать для отправки BEE в будущем
+            } catch (e) {
+                alert('Ошибка подключения: ' + e.message);
+            }
+        }
+        document.getElementById('connectWallet').addEventListener('click', connectTonWallet);
+
+        // Если уже есть подключение - показываем (можно сохранить в localStorage)
+        // Для простоты оставим так.
+
+        // -------- Инициализация Telegram Mini App --------
+        if (window.Telegram && window.Telegram.WebApp) {
+            window.Telegram.WebApp.ready();
+            window.Telegram.WebApp.expand(); // развернуть на весь экран
+        }
+    </script>
+</body>
+</html>
