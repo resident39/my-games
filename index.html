@@ -1,847 +1,1564 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BEE Кликер</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>BEE Кликер — карта мира</title>
+    <!-- Font Awesome 6 (бесплатная версия) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
-        html, body { height: 100%; }
+        /* ===== БАЗА ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        html,
         body {
-            font-family: 'Segoe UI', sans-serif;
-            background: linear-gradient(145deg, #1e2a3a, #0f172a);
+            height: 100%;
+        }
+        body {
+            font-family: "Segoe UI", "Apple Color Emoji", "Segoe UI Emoji", sans-serif;
+            background: linear-gradient(145deg, #0b1424, #19233c);
             min-height: 100vh;
             display: flex;
             justify-content: center;
-            color: white;
+            color: #fff;
         }
         .app {
-            width: 400px;
+            width: 420px;
             max-width: 100%;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             position: relative;
             padding-bottom: 80px;
+            background: radial-gradient(ellipse at 50% 0%, #1e2a4a, #0f172a 80%);
         }
 
-        /* ================= ВЕРХНЯЯ ПАНЕЛЬ ================= */
+        /* ===== ВЕРХНЯЯ ПАНЕЛЬ ===== */
         .top-bar {
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 10px;
             padding: 14px 16px 8px;
+            z-index: 10;
         }
         .profile-bar {
-            display: flex; align-items: center; gap: 10px;
-            background: rgba(255,255,255,0.06);
-            border-radius: 30px; padding: 6px 14px 6px 6px; flex: 1; min-width: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.07);
+            border-radius: 30px;
+            padding: 5px 14px 5px 5px;
+            flex: 1;
+            min-width: 0;
+            backdrop-filter: blur(4px);
         }
         .avatar {
-            width: 38px; height: 38px; border-radius: 50%;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
             background: linear-gradient(145deg, #facc15, #b45309);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.1rem; font-weight: bold; color: #0f172a; flex-shrink: 0; overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #0f172a;
+            flex-shrink: 0;
+            overflow: hidden;
         }
-        .avatar img { width: 100%; height: 100%; object-fit: cover; }
-        .profile-info { min-width: 0; }
-        .profile-name { font-size: 0.9rem; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .profile-level { font-size: 0.7rem; color: #facc15; opacity: 0.9; }
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .profile-info {
+            min-width: 0;
+        }
+        .profile-name {
+            font-size: 0.9rem;
+            font-weight: bold;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .profile-level {
+            font-size: 0.7rem;
+            color: #facc15;
+            opacity: 0.9;
+        }
 
         .token-pill {
-            display: flex; align-items: center; gap: 6px;
-            background: #1e293b; border: 1px solid #facc1550; border-radius: 30px;
-            padding: 6px 8px 6px 10px; cursor: pointer; flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: #1e293b;
+            border: 1px solid #facc1550;
+            border-radius: 30px;
+            padding: 6px 8px 6px 10px;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: 0.2s;
         }
-        .token-pill .icon { width: 22px; height: 22px; border-radius: 50%; background: radial-gradient(circle, #ffe066, #b45309); display: flex; align-items: center; justify-content: center; font-size: 0.85rem; }
-        .token-pill .val { font-weight: bold; font-size: 0.95rem; }
-        .token-pill .plus { width: 20px; height: 20px; border-radius: 50%; background: #facc15; color: #0f172a; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.9rem; }
+        .token-pill:hover {
+            border-color: #facc15;
+        }
+        .token-pill .icon {
+            font-size: 1rem;
+            color: #facc15;
+        }
+        .token-pill .val {
+            font-weight: bold;
+            font-size: 0.95rem;
+        }
+        .token-pill .plus {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #facc15;
+            color: #0f172a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
 
-        .tab-content { flex: 1; padding: 0 16px; }
-        .tab-panel { display: none; }
-        .tab-panel.active { display: block; }
+        /* ===== ВКЛАДКИ ===== */
+        .tab-content {
+            flex: 1;
+            padding: 0 16px;
+        }
+        .tab-panel {
+            display: none;
+            animation: fadeUp 0.3s ease;
+        }
+        .tab-panel.active {
+            display: block;
+        }
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
 
-        /* ================= ГЛАВНАЯ ================= */
-        .bee-stage { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px 0 4px; }
-        .balance-big { font-size: 2.6rem; font-weight: bold; margin-bottom: 2px; text-shadow: 0 0 20px #facc1560; }
-        .balance-label { font-size: 0.8rem; opacity: 0.6; margin-bottom: 10px; }
+        /* ===== ГЛАВНАЯ ===== */
+        .bee-stage {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 0 4px;
+        }
+        .balance-big {
+            font-size: 2.8rem;
+            font-weight: bold;
+            text-shadow: 0 0 30px #facc1560;
+            letter-spacing: 1px;
+        }
+        .balance-label {
+            font-size: 0.8rem;
+            opacity: 0.6;
+            margin-bottom: 10px;
+        }
 
-        .bee-wrap { width: 220px; height: 220px; perspective: 900px; margin: 10px auto 6px; cursor: pointer; }
-        .bee-orbit { width: 100%; height: 100%; transform-style: preserve-3d; animation: beeOrbit 5s ease-in-out infinite; display: flex; align-items: center; justify-content: center; }
+        .bee-wrap {
+            width: 220px;
+            height: 220px;
+            perspective: 900px;
+            margin: 10px auto 6px;
+            cursor: pointer;
+        }
+        .bee-orbit {
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            animation: beeOrbit 5s ease-in-out infinite;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
         .bee-float {
-            width: 170px; height: 170px; border-radius: 50%;
+            width: 170px;
+            height: 170px;
+            border-radius: 50%;
             background: radial-gradient(circle at 35% 30%, #fff6c8, #facc15 45%, #b45309 100%);
-            box-shadow: 0 0 50px #facc1580, inset 0 -10px 25px rgba(0,0,0,0.25);
-            display: flex; align-items: center; justify-content: center;
-            animation: beeBob 2.4s ease-in-out infinite; transform-style: preserve-3d; position: relative;
+            box-shadow: 0 0 50px #facc1580, inset 0 -10px 25px rgba(0, 0, 0, 0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: beeBob 2.4s ease-in-out infinite;
+            transform-style: preserve-3d;
+            position: relative;
         }
-        .bee-emoji { font-size: 5.5rem; filter: drop-shadow(0 8px 10px rgba(0,0,0,0.35)); animation: beeWiggle 1.2s ease-in-out infinite; }
-        .bee-wing { position: absolute; top: 28%; width: 34px; height: 22px; background: rgba(255,255,255,0.75); border-radius: 60%; box-shadow: 0 0 8px rgba(255,255,255,0.6); animation: wingFlap 0.18s ease-in-out infinite alternate; }
-        .bee-wing.left { left: 18%; transform-origin: right center; }
-        .bee-wing.right { right: 18%; transform-origin: left center; }
-        .bee-shadow { width: 110px; height: 18px; background: radial-gradient(ellipse, rgba(0,0,0,0.45), transparent 70%); margin: 6px auto 0; border-radius: 50%; animation: shadowPulse 2.4s ease-in-out infinite; }
-        .bee-wrap:active .bee-float { transform: scale(0.9); }
+        .bee-emoji {
+            font-size: 4.8rem;
+            filter: drop-shadow(0 8px 10px rgba(0, 0, 0, 0.35));
+            animation: beeWiggle 1.2s ease-in-out infinite;
+            color: #0f172a;
+        }
+        .bee-wing {
+            position: absolute;
+            top: 28%;
+            width: 34px;
+            height: 22px;
+            background: rgba(255, 255, 255, 0.75);
+            border-radius: 60%;
+            box-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
+            animation: wingFlap 0.18s ease-in-out infinite alternate;
+        }
+        .bee-wing.left {
+            left: 18%;
+            transform-origin: right center;
+        }
+        .bee-wing.right {
+            right: 18%;
+            transform-origin: left center;
+        }
+        .bee-shadow {
+            width: 110px;
+            height: 18px;
+            background: radial-gradient(ellipse, rgba(0, 0, 0, 0.45), transparent 70%);
+            margin: 6px auto 0;
+            border-radius: 50%;
+            animation: shadowPulse 2.4s ease-in-out infinite;
+        }
+        .bee-wrap:active .bee-float {
+            transform: scale(0.9);
+        }
 
-        @keyframes beeOrbit { 0%{transform:rotateY(0deg);} 50%{transform:rotateY(22deg);} 100%{transform:rotateY(0deg);} }
-        @keyframes beeBob { 0%,100%{transform:translateY(0) rotateZ(-2deg);} 50%{transform:translateY(-16px) rotateZ(2deg);} }
-        @keyframes beeWiggle { 0%,100%{transform:rotate(-4deg);} 50%{transform:rotate(4deg);} }
-        @keyframes wingFlap { from{transform:scaleX(1) rotate(0deg);} to{transform:scaleX(0.4) rotate(-10deg);} }
-        @keyframes shadowPulse { 0%,100%{transform:scale(1);opacity:0.6;} 50%{transform:scale(0.75);opacity:0.35;} }
-        .tap-hint { font-size: 0.75rem; opacity: 0.5; margin-top: 4px; }
+        @keyframes beeOrbit {
+            0% {
+                transform: rotateY(0deg);
+            }
+            50% {
+                transform: rotateY(22deg);
+            }
+            100% {
+                transform: rotateY(0deg);
+            }
+        }
+        @keyframes beeBob {
+            0%,
+            100% {
+                transform: translateY(0) rotateZ(-2deg);
+            }
+            50% {
+                transform: translateY(-16px) rotateZ(2deg);
+            }
+        }
+        @keyframes beeWiggle {
+            0%,
+            100% {
+                transform: rotate(-4deg);
+            }
+            50% {
+                transform: rotate(4deg);
+            }
+        }
+        @keyframes wingFlap {
+            from {
+                transform: scaleX(1) rotate(0deg);
+            }
+            to {
+                transform: scaleX(0.4) rotate(-10deg);
+            }
+        }
+        @keyframes shadowPulse {
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 0.6;
+            }
+            50% {
+                transform: scale(0.75);
+                opacity: 0.35;
+            }
+        }
+        .tap-hint {
+            font-size: 0.75rem;
+            opacity: 0.5;
+            margin-top: 4px;
+        }
 
-        .stats { display: flex; justify-content: space-between; font-size: 1rem; background: #1e293b80; border-radius: 30px; padding: 12px 20px; margin: 14px 0; flex-wrap: wrap; gap: 6px; }
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            background: #1e293b80;
+            border-radius: 30px;
+            padding: 12px 16px;
+            margin: 14px 0;
+            flex-wrap: wrap;
+            gap: 6px;
+            backdrop-filter: blur(2px);
+        }
+        .stats span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .stats i {
+            width: 18px;
+            color: #facc15;
+        }
+
         .upgrade-btn {
-            background: #facc15; color: #0f172a; border: none; padding: 12px 20px; border-radius: 40px;
-            font-weight: bold; font-size: 1.05rem; width: 100%; margin: 8px 0; cursor: pointer; box-shadow: 0 4px 0 #b45309;
+            background: #facc15;
+            color: #0f172a;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 40px;
+            font-weight: bold;
+            font-size: 1.05rem;
+            width: 100%;
+            margin: 8px 0;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #b45309;
+            transition: 0.05s linear;
         }
-        .upgrade-btn:active { transform: translateY(4px); box-shadow: none; }
-        .upgrade-btn.secondary { background: #3b82f6; color: white; box-shadow: 0 4px 0 #1d4ed8; }
-        .upgrade-btn.ghost { background: transparent; border: 1px solid #facc1560; color: #facc15; box-shadow: none; }
-        .upgrade-btn:disabled { opacity: 0.45; box-shadow: none; transform: none; cursor: default; }
+        .upgrade-btn:active {
+            transform: translateY(4px);
+            box-shadow: none;
+        }
+        .upgrade-btn.secondary {
+            background: #3b82f6;
+            color: white;
+            box-shadow: 0 4px 0 #1d4ed8;
+        }
+        .upgrade-btn.ghost {
+            background: transparent;
+            border: 1px solid #facc1560;
+            color: #facc15;
+            box-shadow: none;
+        }
+        .upgrade-btn:disabled {
+            opacity: 0.45;
+            box-shadow: none;
+            transform: none;
+            cursor: default;
+        }
 
-        /* ================= МАГАЗИН (модалка) ================= */
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: flex-end; justify-content: center; z-index: 50; }
-        .modal-overlay.open { display: flex; }
-        .modal-sheet { width: 400px; max-width: 100%; background: #16213a; border-radius: 30px 30px 0 0; padding: 20px 18px 28px; box-shadow: 0 -10px 40px rgba(0,0,0,0.6); max-height: 85vh; overflow-y: auto; }
-        .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
-        .modal-title { font-size: 1.3rem; color: #facc15; font-weight: bold; }
-        .modal-close { width: 32px; height: 32px; border-radius: 50%; background: #1e293b; border: none; color: white; font-size: 1.1rem; cursor: pointer; }
-        .shop-pack { display: flex; align-items: center; justify-content: space-between; background: #1e293b80; border-radius: 20px; padding: 12px 14px; margin-bottom: 10px; border: 1px solid transparent; }
-        .shop-pack.popular { border-color: #facc1560; }
-        .shop-pack-info .amount { font-weight: bold; font-size: 1.05rem; }
-        .shop-pack-info .badge { font-size: 0.65rem; color: #0f172a; background: #facc15; padding: 1px 8px; border-radius: 10px; margin-left: 6px; font-weight: bold; }
-        .shop-pack-price { background: #facc15; color: #0f172a; border: none; padding: 8px 16px; border-radius: 30px; font-weight: bold; font-size: 0.9rem; cursor: pointer; box-shadow: 0 3px 0 #b45309; white-space: nowrap; }
-        .shop-pack-price:active { transform: translateY(3px); box-shadow: none; }
-        .sbp-note { display: flex; align-items: center; gap: 8px; font-size: 0.75rem; opacity: 0.7; margin-top: 12px; text-align: left; }
+        /* ===== МОДАЛКА МАГАЗИНА ===== */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            display: none;
+            align-items: flex-end;
+            justify-content: center;
+            z-index: 50;
+        }
+        .modal-overlay.open {
+            display: flex;
+        }
+        .modal-sheet {
+            width: 420px;
+            max-width: 100%;
+            background: #16213a;
+            border-radius: 30px 30px 0 0;
+            padding: 20px 18px 28px;
+            box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.6);
+            max-height: 85vh;
+            overflow-y: auto;
+            backdrop-filter: blur(10px);
+        }
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+        }
+        .modal-title {
+            font-size: 1.3rem;
+            color: #facc15;
+            font-weight: bold;
+        }
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #1e293b;
+            border: none;
+            color: white;
+            font-size: 1.1rem;
+            cursor: pointer;
+        }
+        .shop-pack {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #1e293b80;
+            border-radius: 20px;
+            padding: 12px 14px;
+            margin-bottom: 10px;
+            border: 1px solid transparent;
+        }
+        .shop-pack.popular {
+            border-color: #facc1560;
+        }
+        .shop-pack-info .amount {
+            font-weight: bold;
+            font-size: 1.05rem;
+        }
+        .shop-pack-info .badge {
+            font-size: 0.65rem;
+            color: #0f172a;
+            background: #facc15;
+            padding: 1px 8px;
+            border-radius: 10px;
+            margin-left: 6px;
+            font-weight: bold;
+        }
+        .shop-pack-price {
+            background: #facc15;
+            color: #0f172a;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            cursor: pointer;
+            box-shadow: 0 3px 0 #b45309;
+            white-space: nowrap;
+        }
+        .shop-pack-price:active {
+            transform: translateY(3px);
+            box-shadow: none;
+        }
+        .sbp-note {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.75rem;
+            opacity: 0.7;
+            margin-top: 12px;
+            text-align: left;
+        }
 
-        /* ================= НИЖНЯЯ НАВИГАЦИЯ ================= */
+        /* ===== НИЖНЯЯ НАВИГАЦИЯ ===== */
         .bottom-nav {
-            position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
-            width: 400px; max-width: 100%; background: #131c2e; border-top: 1px solid rgba(255,255,255,0.08);
-            display: flex; justify-content: space-around; padding: 6px 2px calc(6px + env(safe-area-inset-bottom)); z-index: 40;
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 420px;
+            max-width: 100%;
+            background: #131c2e;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            justify-content: space-around;
+            padding: 6px 2px calc(6px + env(safe-area-inset-bottom));
+            z-index: 40;
+            backdrop-filter: blur(6px);
         }
         .nav-btn {
-            background: none; border: none; color: #8b95a7; display: flex; flex-direction: column; align-items: center; gap: 2px;
-            font-size: 0.58rem; padding: 5px 3px; cursor: pointer; border-radius: 12px; flex: 1; line-height: 1.1;
+            background: none;
+            border: none;
+            color: #8b95a7;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            font-size: 0.58rem;
+            padding: 5px 3px;
+            cursor: pointer;
+            border-radius: 12px;
+            flex: 1;
+            line-height: 1.1;
+            transition: 0.2s;
         }
-        .nav-btn .nav-icon { font-size: 1.2rem; }
-        .nav-btn.active { color: #facc15; background: rgba(250,204,21,0.08); }
-
-        /* ================= ОБЩИЕ БЛОКИ ================= */
-        .section-title { font-size: 1.3rem; color: #facc15; margin: 16px 0 10px; }
-        .subtabs { display: flex; gap: 8px; margin-bottom: 14px; }
-        .subtab-btn { flex: 1; padding: 9px; border-radius: 20px; border: 1px solid #facc1540; background: transparent; color: #cbd5e1; font-weight: bold; font-size: 0.9rem; cursor: pointer; }
-        .subtab-btn.active { background: #facc15; color: #0f172a; border-color: #facc15; }
-        .subtab-panel { display: none; flex-direction: column; gap: 10px; }
-        .subtab-panel.active { display: flex; }
-
-        .task-item, .upg-item, .target-item { display: flex; align-items: center; justify-content: space-between; gap: 10px; background: #1e293b80; border-radius: 20px; padding: 12px 14px; }
-        .task-item.done { opacity: 0.5; }
-        .task-info, .upg-info, .target-info { flex: 1; min-width: 0; }
-        .task-title, .upg-title, .target-title { font-size: 0.95rem; font-weight: bold; display: flex; align-items: center; gap: 6px; }
-        .task-reward, .upg-desc, .target-sub { font-size: 0.78rem; color: #cbd5e1; margin-top: 2px; }
-        .upg-reward { font-size: 0.78rem; color: #facc15; margin-top: 2px; }
-        .task-btn, .upg-btn, .raid-btn {
-            background: #facc15; color: #0f172a; border: none; padding: 8px 14px; border-radius: 30px; font-weight: bold;
-            font-size: 0.85rem; cursor: pointer; box-shadow: 0 3px 0 #b45309; flex-shrink: 0; white-space: nowrap;
+        .nav-btn .nav-icon {
+            font-size: 1.2rem;
         }
-        .task-btn:active, .upg-btn:active, .raid-btn:active { transform: translateY(3px); box-shadow: none; }
-        .task-btn.claimed { background: #22c55e; box-shadow: 0 3px 0 #15803d; cursor: default; }
-        .task-btn:disabled, .upg-btn:disabled, .raid-btn:disabled { opacity: 0.5; }
-        .lvl-badge { font-size: 0.65rem; background: #facc1530; color: #facc15; padding: 1px 8px; border-radius: 10px; }
+        .nav-btn.active {
+            color: #facc15;
+            background: rgba(250, 204, 21, 0.08);
+        }
+        .nav-btn:hover {
+            color: #facc15;
+        }
 
-        .card { background: #1e293b80; border-radius: 24px; padding: 18px; margin-bottom: 14px; text-align: left; }
-        .card-title { font-weight: bold; margin-bottom: 8px; }
-        .wallet-status { background: #22c55e30; border: 1px solid #22c55e; padding: 10px; border-radius: 20px; margin-bottom: 12px; font-size: 0.9rem; }
-        .ref-link { background: #1e293b; padding: 12px; border-radius: 20px; font-size: 0.85rem; word-break: break-all; border: 1px dashed #facc1560; }
-        .copy-btn { margin-top: 10px; }
-        .ref-stats { display: flex; gap: 10px; margin-top: 12px; }
-        .ref-stat-box { flex: 1; background: #1e293b; border-radius: 16px; padding: 10px; text-align: center; }
-        .ref-stat-box .num { font-size: 1.3rem; font-weight: bold; color: #facc15; }
-        .ref-stat-box .lbl { font-size: 0.7rem; opacity: 0.7; }
+        /* ===== ОБЩИЕ БЛОКИ ===== */
+        .section-title {
+            font-size: 1.3rem;
+            color: #facc15;
+            margin: 16px 0 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .subtabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+        .subtab-btn {
+            flex: 1;
+            padding: 9px;
+            border-radius: 20px;
+            border: 1px solid #facc1540;
+            background: transparent;
+            color: #cbd5e1;
+            font-weight: bold;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .subtab-btn.active {
+            background: #facc15;
+            color: #0f172a;
+            border-color: #facc15;
+        }
 
-        /* ================= УЛЕЙ ================= */
+        .subtab-panel {
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .subtab-panel.active {
+            display: flex;
+        }
+
+        .task-item,
+        .upg-item,
+        .target-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            background: #1e293b80;
+            border-radius: 20px;
+            padding: 12px 14px;
+            backdrop-filter: blur(2px);
+        }
+        .task-item.done {
+            opacity: 0.5;
+        }
+        .task-info,
+        .upg-info,
+        .target-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .task-title,
+        .upg-title,
+        .target-title {
+            font-size: 0.95rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .task-reward,
+        .upg-desc,
+        .target-sub {
+            font-size: 0.78rem;
+            color: #cbd5e1;
+            margin-top: 2px;
+        }
+        .upg-reward {
+            font-size: 0.78rem;
+            color: #facc15;
+            margin-top: 2px;
+        }
+        .task-btn,
+        .upg-btn,
+        .raid-btn {
+            background: #facc15;
+            color: #0f172a;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 0.85rem;
+            cursor: pointer;
+            box-shadow: 0 3px 0 #b45309;
+            flex-shrink: 0;
+            white-space: nowrap;
+            transition: 0.05s linear;
+        }
+        .task-btn:active,
+        .upg-btn:active,
+        .raid-btn:active {
+            transform: translateY(3px);
+            box-shadow: none;
+        }
+        .task-btn.claimed {
+            background: #22c55e;
+            box-shadow: 0 3px 0 #15803d;
+            cursor: default;
+        }
+        .task-btn:disabled,
+        .upg-btn:disabled,
+        .raid-btn:disabled {
+            opacity: 0.5;
+            cursor: default;
+            box-shadow: none;
+            transform: none;
+        }
+        .lvl-badge {
+            font-size: 0.65rem;
+            background: #facc1530;
+            color: #facc15;
+            padding: 1px 8px;
+            border-radius: 10px;
+        }
+
+        .card {
+            background: #1e293b80;
+            border-radius: 24px;
+            padding: 18px;
+            margin-bottom: 14px;
+            text-align: left;
+            backdrop-filter: blur(2px);
+        }
+        .card-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        .wallet-status {
+            background: #22c55e30;
+            border: 1px solid #22c55e;
+            padding: 10px;
+            border-radius: 20px;
+            margin-bottom: 12px;
+            font-size: 0.9rem;
+        }
+        .ref-link {
+            background: #1e293b;
+            padding: 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            word-break: break-all;
+            border: 1px dashed #facc1560;
+        }
+        .copy-btn {
+            margin-top: 10px;
+        }
+        .ref-stats {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+        }
+        .ref-stat-box {
+            flex: 1;
+            background: #1e293b;
+            border-radius: 16px;
+            padding: 10px;
+            text-align: center;
+        }
+        .ref-stat-box .num {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #facc15;
+        }
+        .ref-stat-box .lbl {
+            font-size: 0.7rem;
+            opacity: 0.7;
+        }
+
+        /* ===== УЛЕЙ ===== */
         .hive-summary {
-            display: flex; align-items: center; justify-content: space-between;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             background: linear-gradient(135deg, #3d2c0f, #1e293b);
-            border: 1px solid #facc1550; border-radius: 24px; padding: 16px; margin-bottom: 14px;
+            border: 1px solid #facc1550;
+            border-radius: 24px;
+            padding: 16px;
+            margin-bottom: 14px;
         }
-        .hive-honey-val { font-size: 1.6rem; font-weight: bold; color: #facc15; }
-        .hive-honey-lbl { font-size: 0.7rem; opacity: 0.7; }
-        .hive-collect-btn { background: #22c55e; color: white; box-shadow: 0 3px 0 #15803d; border: none; padding: 10px 18px; border-radius: 30px; font-weight: bold; cursor: pointer; }
-        .hive-collect-btn:active { transform: translateY(3px); box-shadow: none; }
-        .hive-cap-bar { width: 100%; height: 8px; background: #0f172a; border-radius: 8px; overflow: hidden; margin-top: 8px; }
-        .hive-cap-fill { height: 100%; background: linear-gradient(90deg, #facc15, #f59e0b); transition: width 0.3s; }
+        .hive-honey-val {
+            font-size: 1.6rem;
+            font-weight: bold;
+            color: #facc15;
+        }
+        .hive-honey-lbl {
+            font-size: 0.7rem;
+            opacity: 0.7;
+        }
+        .hive-collect-btn {
+            background: #22c55e;
+            color: white;
+            box-shadow: 0 3px 0 #15803d;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 30px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.05s linear;
+        }
+        .hive-collect-btn:active {
+            transform: translateY(3px);
+            box-shadow: none;
+        }
+        .hive-cap-bar {
+            width: 100%;
+            height: 8px;
+            background: #0f172a;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+        .hive-cap-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #facc15, #f59e0b);
+            transition: width 0.3s;
+        }
 
-        /* ================= КАРТА ================= */
-        .map-note { font-size: 0.75rem; opacity: 0.65; margin-bottom: 12px; }
-        .target-item.raided { opacity: 0.55; }
-        .defense-badge { font-size: 0.7rem; background: #ef444430; color: #f87171; padding: 1px 8px; border-radius: 10px; }
-        .honey-badge { font-size: 0.7rem; background: #facc1530; color: #facc15; padding: 1px 8px; border-radius: 10px; }
+        /* ===== КАРТА МИРА (новая) ===== */
+        .world-map-container {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            background: radial-gradient(ellipse at 30% 40%, #1e3a5f, #0b1a2e);
+            border-radius: 30px;
+            border: 1px solid #facc1540;
+            box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.6);
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+        .world-map-container .map-grid {
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 20% 20%;
+            pointer-events: none;
+        }
+        .map-marker {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            transform: translate(-50%, -50%);
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.6));
+            transition: transform 0.2s;
+        }
+        .map-marker:hover {
+            transform: translate(-50%, -50%) scale(1.15);
+        }
+        .map-marker .marker-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #facc15, #b45309);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: #0f172a;
+            box-shadow: 0 0 20px #facc1560;
+            animation: markerPulse 2s ease-in-out infinite;
+        }
+        .map-marker.defeated .marker-icon {
+            background: radial-gradient(circle at 30% 30%, #6b7280, #374151);
+            box-shadow: 0 0 10px #6b728060;
+            animation: none;
+        }
+        .map-marker .marker-label {
+            margin-top: 4px;
+            font-size: 0.6rem;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 2px 8px;
+            border-radius: 10px;
+            white-space: nowrap;
+            color: #facc15;
+            border: 1px solid #facc1540;
+        }
+        .map-marker .marker-honey {
+            font-size: 0.6rem;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 0 6px;
+            border-radius: 8px;
+            color: #facc15;
+        }
+        @keyframes markerPulse {
+            0%,
+            100% {
+                box-shadow: 0 0 20px #facc1560;
+            }
+            50% {
+                box-shadow: 0 0 40px #facc15b0;
+            }
+        }
+
+        .map-legend {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            font-size: 0.75rem;
+            color: #cbd5e1;
+            margin-bottom: 10px;
+        }
+        .map-legend span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .map-legend i {
+            color: #facc15;
+        }
+
+        .map-cooldown-hint {
+            text-align: center;
+            font-size: 0.75rem;
+            opacity: 0.6;
+            margin-top: 8px;
+        }
+
+        /* ===== АДАПТИВ ===== */
+        @media (max-width: 420px) {
+            .app {
+                width: 100%;
+            }
+            .bottom-nav {
+                width: 100%;
+            }
+            .bee-wrap {
+                width: 170px;
+                height: 170px;
+            }
+            .bee-float {
+                width: 130px;
+                height: 130px;
+            }
+            .bee-emoji {
+                font-size: 3.8rem;
+            }
+            .stats {
+                font-size: 0.8rem;
+                padding: 8px 12px;
+            }
+        }
     </style>
 </head>
 <body>
-<div class="app">
+    <div class="app">
 
-    <!-- ================= ВЕРХНЯЯ ПАНЕЛЬ ================= -->
-    <div class="top-bar">
-        <div class="profile-bar">
-            <div class="avatar" id="avatar">🐝</div>
-            <div class="profile-info">
-                <div class="profile-name" id="profileName">Загрузка...</div>
-                <div class="profile-level">Уровень: <span id="profileLevel">0</span></div>
+        <!-- ================= ВЕРХНЯЯ ПАНЕЛЬ ================= -->
+        <div class="top-bar">
+            <div class="profile-bar">
+                <div class="avatar" id="avatar"><i class="fas fa-user"></i></div>
+                <div class="profile-info">
+                    <div class="profile-name" id="profileName">Загрузка...</div>
+                    <div class="profile-level">Уровень: <span id="profileLevel">0</span></div>
+                </div>
+            </div>
+            <div class="token-pill" id="openShopBtn">
+                <span class="icon"><i class="fas fa-jar"></i></span>
+                <span class="val" id="balanceTop">0</span>
+                <span class="plus"><i class="fas fa-plus"></i></span>
             </div>
         </div>
-        <div class="token-pill" id="openShopBtn">
-            <span class="icon">🍯</span>
-            <span class="val" id="balanceTop">0</span>
-            <span class="plus">+</span>
-        </div>
-    </div>
 
-    <div class="tab-content">
+        <div class="tab-content">
 
-        <!-- ================= ГЛАВНАЯ ================= -->
-        <div class="tab-panel active" id="tab-main">
-            <div class="bee-stage">
-                <div class="balance-big" id="balance">0</div>
-                <div class="balance-label">BEE токенов</div>
-                <div class="bee-wrap" id="clickBtn">
-                    <div class="bee-orbit">
-                        <div class="bee-float">
-                            <div class="bee-wing left"></div>
-                            <div class="bee-wing right"></div>
-                            <div class="bee-emoji">🐝</div>
+            <!-- ================= ГЛАВНАЯ ================= -->
+            <div class="tab-panel active" id="tab-main">
+                <div class="bee-stage">
+                    <div class="balance-big" id="balance">0</div>
+                    <div class="balance-label">BEE токенов</div>
+                    <div class="bee-wrap" id="clickBtn">
+                        <div class="bee-orbit">
+                            <div class="bee-float">
+                                <div class="bee-wing left"></div>
+                                <div class="bee-wing right"></div>
+                                <div class="bee-emoji"><i class="fas fa-bug"></i></div>
+                            </div>
                         </div>
                     </div>
+                    <div class="bee-shadow"></div>
+                    <div class="tap-hint"><i class="fas fa-hand-pointer"></i> нажимай на пчелу</div>
                 </div>
-                <div class="bee-shadow"></div>
-                <div class="tap-hint">👆 нажимай на пчелу</div>
-            </div>
 
-            <div class="stats">
-                <span>💰 за клик: <span id="perClick">1</span></span>
-                <span>⚡ кликов: <span id="totalClicks">0</span></span>
-                <span>🗡 атака: <span id="statAttack">0</span></span>
-                <span>🎯 крит: <span id="statCrit">0</span>%</span>
-            </div>
-
-            <button class="upgrade-btn" id="upgradeBtn">⬆ Улучшить (стоит: <span id="upgradeCost">10</span> BEE)</button>
-            <button class="upgrade-btn" id="autoBtn">🤖 Автокликер (стоит: <span id="autoCost">50</span> BEE)</button>
-            <button class="upgrade-btn ghost" id="openShopBtn2">🛒 Купить BEE за деньги</button>
-        </div>
-
-        <!-- ================= УЛЕЙ ================= -->
-        <div class="tab-panel" id="tab-hive">
-            <div class="section-title">🏠 Улей</div>
-
-            <div class="hive-summary">
-                <div>
-                    <div class="hive-honey-val"><span id="hiveHoneyVal">0</span> / <span id="hiveCapVal">150</span></div>
-                    <div class="hive-honey-lbl">🍯 накоплено в улье</div>
-                    <div class="hive-cap-bar"><div class="hive-cap-fill" id="hiveCapFill" style="width:0%"></div></div>
+                <div class="stats">
+                    <span><i class="fas fa-coins"></i> за клик: <span id="perClick">1</span></span>
+                    <span><i class="fas fa-bolt"></i> кликов: <span id="totalClicks">0</span></span>
+                    <span><i class="fas fa-sword"></i> атака: <span id="statAttack">0</span></span>
+                    <span><i class="fas fa-bullseye"></i> крит: <span id="statCrit">0</span>%</span>
                 </div>
-                <button class="hive-collect-btn" id="collectHiveBtn">Собрать</button>
+
+                <button class="upgrade-btn" id="upgradeBtn"><i class="fas fa-arrow-up"></i> Улучшить (стоит: <span id="upgradeCost">10</span> BEE)</button>
+                <button class="upgrade-btn" id="autoBtn"><i class="fas fa-robot"></i> Автокликер (стоит: <span id="autoCost">50</span> BEE)</button>
+                <button class="upgrade-btn ghost" id="openShopBtn2"><i class="fas fa-store"></i> Купить BEE за деньги</button>
             </div>
 
-            <div class="subtabs">
-                <button class="subtab-btn active" data-hivetab="bee">Апгрейды пчелы</button>
-                <button class="subtab-btn" data-hivetab="building">Постройки улья</button>
+            <!-- ================= УЛЕЙ ================= -->
+            <div class="tab-panel" id="tab-hive">
+                <div class="section-title"><i class="fas fa-home"></i> Улей</div>
+
+                <div class="hive-summary">
+                    <div>
+                        <div class="hive-honey-val"><span id="hiveHoneyVal">0</span> / <span id="hiveCapVal">150</span></div>
+                        <div class="hive-honey-lbl"><i class="fas fa-jar"></i> накоплено в улье</div>
+                        <div class="hive-cap-bar"><div class="hive-cap-fill" id="hiveCapFill" style="width:0%"></div></div>
+                    </div>
+                    <button class="hive-collect-btn" id="collectHiveBtn"><i class="fas fa-hand-holding"></i> Собрать</button>
+                </div>
+
+                <div class="subtabs">
+                    <button class="subtab-btn active" data-hivetab="bee"><i class="fas fa-bug"></i> Апгрейды пчелы</button>
+                    <button class="subtab-btn" data-hivetab="building"><i class="fas fa-building"></i> Постройки улья</button>
+                </div>
+                <div class="subtab-panel active" id="hivetab-bee"></div>
+                <div class="subtab-panel" id="hivetab-building"></div>
             </div>
-            <div class="subtab-panel active" id="hivetab-bee"></div>
-            <div class="subtab-panel" id="hivetab-building"></div>
-        </div>
 
-        <!-- ================= ЗАДАНИЯ ================= -->
-        <div class="tab-panel" id="tab-tasks">
-            <div class="section-title">📋 Задания</div>
-            <div class="subtabs">
-                <button class="subtab-btn active" data-subtab="daily">Ежедневные</button>
-                <button class="subtab-btn" data-subtab="weekly">Недельные</button>
+            <!-- ================= ЗАДАНИЯ ================= -->
+            <div class="tab-panel" id="tab-tasks">
+                <div class="section-title"><i class="fas fa-clipboard-list"></i> Задания</div>
+                <div class="subtabs">
+                    <button class="subtab-btn active" data-subtab="daily">Ежедневные</button>
+                    <button class="subtab-btn" data-subtab="weekly">Недельные</button>
+                </div>
+                <div class="subtab-panel active" id="subtab-daily"></div>
+                <div class="subtab-panel" id="subtab-weekly"></div>
             </div>
-            <div class="subtab-panel active" id="subtab-daily"></div>
-            <div class="subtab-panel" id="subtab-weekly"></div>
-        </div>
 
-        <!-- ================= КАРТА МИРА ================= -->
-        <div class="tab-panel" id="tab-map">
-            <div class="section-title">🗺️ Карта мира</div>
-            <div class="map-note">Демо-режим: список ульев — локальные тестовые данные на этом устройстве. Для настоящей игры между реальными игроками нужен серверный backend, который хранит и синхронизирует ульи всех участников.</div>
-            <div id="targetsList" style="display:flex; flex-direction:column; gap:10px;"></div>
-        </div>
-
-        <!-- ================= КОШЕЛЁК ================= -->
-        <div class="tab-panel" id="tab-wallet">
-            <div class="section-title">👛 Кошелёк</div>
-            <div class="card">
-                <div class="wallet-status" id="walletStatus">⚡ Кошелёк не подключён</div>
-                <button class="upgrade-btn secondary" id="connectWallet">🔗 Подключить TON кошелёк</button>
+            <!-- ================= КАРТА МИРА (новая) ================= -->
+            <div class="tab-panel" id="tab-map">
+                <div class="section-title"><i class="fas fa-map"></i> Карта мира</div>
+                <div class="map-legend">
+                    <span><i class="fas fa-circle" style="color:#facc15;"></i> Улей с мёдом</span>
+                    <span><i class="fas fa-circle" style="color:#6b7280;"></i> Разграблен</span>
+                    <span><i class="fas fa-clock"></i> 5 мин перезарядка</span>
+                </div>
+                <div class="world-map-container" id="worldMapContainer">
+                    <div class="map-grid"></div>
+                    <!-- Маркеры будут вставлены скриптом -->
+                </div>
+                <div class="map-cooldown-hint" id="mapCooldownHint">Нажмите на улей, чтобы совершить налёт</div>
             </div>
-        </div>
 
-        <!-- ================= РЕФЕРАЛЫ ================= -->
-        <div class="tab-panel" id="tab-ref">
-            <div class="section-title">🔗 Рефералы</div>
-            <div class="card">
-                <div class="card-title">Ваша реферальная ссылка</div>
-                <div class="ref-link" id="refLink">загрузка...</div>
-                <button class="upgrade-btn ghost copy-btn" id="copyRefBtn">📋 Скопировать ссылку</button>
-                <div class="ref-stats">
-                    <div class="ref-stat-box"><div class="num" id="refCount">0</div><div class="lbl">приглашено</div></div>
-                    <div class="ref-stat-box"><div class="num" id="refEarned">0</div><div class="lbl">заработано BEE</div></div>
+            <!-- ================= КОШЕЛЁК ================= -->
+            <div class="tab-panel" id="tab-wallet">
+                <div class="section-title"><i class="fas fa-wallet"></i> Кошелёк</div>
+                <div class="card">
+                    <div class="wallet-status" id="walletStatus"><i class="fas fa-plug"></i> Кошелёк не подключён</div>
+                    <button class="upgrade-btn secondary" id="connectWallet"><i class="fab fa-ton"></i> Подключить TON кошелёк</button>
                 </div>
             </div>
-        </div>
 
-    </div>
-
-    <!-- ================= МАГАЗИН (модалка) ================= -->
-    <div class="modal-overlay" id="shopModal">
-        <div class="modal-sheet">
-            <div class="modal-header">
-                <div class="modal-title">🛒 Магазин BEE</div>
-                <button class="modal-close" id="closeShopBtn">✕</button>
-            </div>
-            <div id="shopPacks"></div>
-            <div class="sbp-note">⚡ Оплата через Систему быстрых платежей (СБП) — мгновенное зачисление на карту любого банка.</div>
-        </div>
-    </div>
-
-    <!-- ================= НИЖНЯЯ НАВИГАЦИЯ ================= -->
-    <div class="bottom-nav">
-        <button class="nav-btn active" data-tab="main"><span class="nav-icon">🐝</span>Главная</button>
-        <button class="nav-btn" data-tab="hive"><span class="nav-icon">🏠</span>Улей</button>
-        <button class="nav-btn" data-tab="tasks"><span class="nav-icon">📋</span>Задания</button>
-        <button class="nav-btn" data-tab="map"><span class="nav-icon">🗺️</span>Карта</button>
-        <button class="nav-btn" data-tab="wallet"><span class="nav-icon">👛</span>Кошелёк</button>
-        <button class="nav-btn" data-tab="ref"><span class="nav-icon">🔗</span>Рефералы</button>
-    </div>
-</div>
-
-<script>
-    // ==================== НАСТРОЙКИ ====================
-    // !!! ЗАМЕНИТЕ НА РЕАЛЬНОЕ ИМЯ ВАШЕГО БОТА (без @) !!!
-    const BOT_USERNAME = 'YourBotUsername'; 
-
-    // ==================== СОСТОЯНИЕ ====================
-    let balance = parseInt(localStorage.getItem('beeBalance')) || 0;
-    let perClick = parseInt(localStorage.getItem('beePerClick')) || 1;
-    let totalClicks = parseInt(localStorage.getItem('beeTotalClicks')) || 0;
-    let upgradeLevel = parseInt(localStorage.getItem('beeUpgradeLevel')) || 0;
-    let autoActive = localStorage.getItem('beeAutoActive') === 'true';
-    let autoInterval = null;
-    let refCount = parseInt(localStorage.getItem('beeRefCount')) || 0;
-    let refEarned = parseInt(localStorage.getItem('beeRefEarned')) || 0;
-
-    // --- апгрейды пчелы ---
-    let critLevel = parseInt(localStorage.getItem('beeCritLevel')) || 0;
-    let attackLevel = parseInt(localStorage.getItem('beeAttackLevel')) || 0;
-    let wingLevel = parseInt(localStorage.getItem('beeWingLevel')) || 0;
-
-    // --- постройки улья ---
-    let honeycombLevel = parseInt(localStorage.getItem('beeHoneycombLevel')) || 0;
-    let warehouseLevel = parseInt(localStorage.getItem('beeWarehouseLevel')) || 0;
-    let hiveHoney = parseFloat(localStorage.getItem('beeHiveHoney')) || 0;
-    let lastPassiveTick = parseInt(localStorage.getItem('beeLastPassiveTick')) || Date.now();
-
-    // --- задания ---
-    let claimedTasks = JSON.parse(localStorage.getItem('beeClaimedTasks') || '[]');
-    let lastDailyReset = localStorage.getItem('beeLastDailyReset') || null;
-    let lastWeeklyReset = localStorage.getItem('beeLastWeeklyReset') || null;
-
-    // ==================== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ====================
-    function critChance() { return Math.min(50, critLevel * 3); }
-    function hiveCap() { return 150 + warehouseLevel * 120; }
-    function honeyPerSec() { return honeycombLevel * 0.4; }
-    function autoTickInterval() { return Math.max(250, 1000 - wingLevel * 90); }
-
-    // ==================== АПГРЕЙДЫ ====================
-    const BEE_UPGRADES = [
-        {
-            id: 'power', title: '⚡ Сила укуса', icon: '⚡',
-            desc: () => `+1 BEE за клик (сейчас ${perClick})`,
-            level: () => upgradeLevel, cost: () => 10 + upgradeLevel * 8,
-            buy: () => { perClick += 1; upgradeLevel++; }
-        },
-        {
-            id: 'crit', title: '🎯 Критический удар', icon: '🎯',
-            desc: () => `Шанс x3 награды за клик: ${critChance()}%`,
-            level: () => critLevel, cost: () => 60 + critLevel * 35,
-            buy: () => { critLevel++; }, maxLevel: 16
-        },
-        {
-            id: 'attack', title: '🗡 Сила атаки', icon: '🗡',
-            desc: () => `Повышает шанс успеха при рейдах на карте (сейчас ${attackLevel * 3}%)`,
-            level: () => attackLevel, cost: () => 80 + attackLevel * 45,
-            buy: () => { attackLevel++; }
-        },
-        {
-            id: 'wing', title: '🌬 Скорость крыльев', icon: '🌬',
-            desc: () => `Ускоряет автокликер (интервал ${autoTickInterval()} мс)`,
-            level: () => wingLevel, cost: () => 100 + wingLevel * 60,
-            buy: () => { wingLevel++; if (autoActive) startAutoClick(); }, maxLevel: 8
-        }
-    ];
-
-    const HIVE_BUILDINGS = [
-        {
-            id: 'honeycomb', title: '🍯 Соты', icon: '🍯',
-            desc: () => `Пассивный доход: +${honeyPerSec().toFixed(1)} BEE/сек в улей`,
-            level: () => honeycombLevel, cost: () => 90 + honeycombLevel * 55,
-            buy: () => { honeycombLevel++; }
-        },
-        {
-            id: 'warehouse', title: '📦 Склад', icon: '📦',
-            desc: () => `Вместимость улья: ${hiveCap()} BEE`,
-            level: () => warehouseLevel, cost: () => 120 + warehouseLevel * 70,
-            buy: () => { warehouseLevel++; }
-        }
-    ];
-
-    function renderUpgradeList(list, containerId) {
-        const el = document.getElementById(containerId);
-        if (!el) return;
-        el.innerHTML = '';
-        list.forEach(u => {
-            const lvl = u.level();
-            const maxed = u.maxLevel && lvl >= u.maxLevel;
-            const cost = u.cost();
-            const item = document.createElement('div');
-            item.className = 'upg-item';
-            item.innerHTML = `
-                <div class="upg-info">
-                    <div class="upg-title">${u.title} <span class="lvl-badge">ур. ${lvl}</span></div>
-                    <div class="upg-desc">${u.desc()}</div>
-                </div>
-                <button class="upg-btn" data-upg="${u.id}" ${maxed ? 'disabled' : ''}>
-                    ${maxed ? 'MAX' : cost + ' 🍯'}
-                </button>`;
-            el.appendChild(item);
-        });
-        el.querySelectorAll('.upg-btn').forEach(btn => {
-            btn.addEventListener('click', () => buyUpgrade(btn.dataset.upg));
-        });
-    }
-
-    function buyUpgrade(id) {
-        const u = BEE_UPGRADES.find(x => x.id === id) || HIVE_BUILDINGS.find(x => x.id === id);
-        if (!u) return;
-        if (u.maxLevel && u.level() >= u.maxLevel) return;
-        const cost = u.cost();
-        if (balance < cost) { alert('Не хватает BEE!'); return; }
-        balance -= cost;
-        u.buy();
-        persistUpgrades();
-        updateUI();
-        renderHiveTabs();
-    }
-
-    function persistUpgrades() {
-        localStorage.setItem('beeCritLevel', critLevel);
-        localStorage.setItem('beeAttackLevel', attackLevel);
-        localStorage.setItem('beeWingLevel', wingLevel);
-        localStorage.setItem('beeHoneycombLevel', honeycombLevel);
-        localStorage.setItem('beeWarehouseLevel', warehouseLevel);
-    }
-
-    function renderHiveTabs() {
-        renderUpgradeList(BEE_UPGRADES, 'hivetab-bee');
-        renderUpgradeList(HIVE_BUILDINGS, 'hivetab-building');
-    }
-
-    document.querySelectorAll('.subtab-btn[data-hivetab]').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('#tab-hive .subtab-btn').forEach(b => b.classList.remove('active'));
-            document.querySelectorAll('#tab-hive .subtab-panel').forEach(p => p.classList.remove('active'));
-            btn.classList.add('active');
-            document.getElementById('hivetab-' + btn.dataset.hivetab).classList.add('active');
-        });
-    });
-
-    // ==================== ПАССИВНЫЙ ДОХОД УЛЬЯ ====================
-    function tickPassiveHoney() {
-        const now = Date.now();
-        const elapsedSec = Math.max(0, (now - lastPassiveTick) / 1000);
-        if (elapsedSec > 0) {
-            hiveHoney = Math.min(hiveCap(), hiveHoney + honeyPerSec() * elapsedSec);
-            lastPassiveTick = now;
-            localStorage.setItem('beeHiveHoney', hiveHoney);
-            localStorage.setItem('beeLastPassiveTick', lastPassiveTick);
-        }
-        document.getElementById('hiveHoneyVal').textContent = Math.floor(hiveHoney);
-        document.getElementById('hiveCapVal').textContent = hiveCap();
-        document.getElementById('hiveCapFill').style.width = Math.min(100, (hiveHoney / hiveCap()) * 100) + '%';
-    }
-
-    document.getElementById('collectHiveBtn').addEventListener('click', () => {
-        const amount = Math.floor(hiveHoney);
-        if (amount <= 0) { alert('В улье пока пусто — подождите или постройте больше сот.'); return; }
-        balance += amount;
-        hiveHoney = 0;
-        localStorage.setItem('beeHiveHoney', hiveHoney);
-        updateUI();
-        tickPassiveHoney(); // сразу обновить
-    });
-
-    setInterval(tickPassiveHoney, 1000);
-
-    // ==================== ЗАДАНИЯ ====================
-    const DAILY_TASKS = [
-        { id: 'daily_bonus', title: 'Ежедневный бонус', reward: 15, type: 'daily' },
-        { id: 'daily_10clicks', title: 'Сделать 10 кликов сегодня', reward: 10, type: 'daily' },
-        { id: 'daily_wallet_check', title: 'Зайти в раздел «Кошелёк»', reward: 5, type: 'daily' }
-    ];
-    const WEEKLY_TASKS = [
-        { id: 'weekly_subscribe', title: 'Подписаться на канал', reward: 50, url: 'https://t.me/your_channel', type: 'weekly' },
-        { id: 'weekly_invite3', title: 'Пригласить 3 друзей', reward: 100, action: 'showRef', type: 'weekly' },
-        { id: 'weekly_100clicks', title: 'Сделать 100 кликов за неделю', reward: 60, type: 'weekly' }
-    ];
-
-    function checkDailyReset() {
-        const now = new Date();
-        if (!lastDailyReset || (now - new Date(lastDailyReset)) >= 24 * 60 * 60 * 1000) {
-            claimedTasks = claimedTasks.filter(id => !DAILY_TASKS.some(t => t.id === id));
-            lastDailyReset = now.toISOString();
-            localStorage.setItem('beeLastDailyReset', lastDailyReset);
-            localStorage.setItem('beeClaimedTasks', JSON.stringify(claimedTasks));
-        }
-    }
-
-    function checkWeeklyReset() {
-        const now = new Date();
-        if (!lastWeeklyReset || (now - new Date(lastWeeklyReset)) >= 7 * 24 * 60 * 60 * 1000) {
-            claimedTasks = claimedTasks.filter(id => !WEEKLY_TASKS.some(t => t.id === id));
-            lastWeeklyReset = now.toISOString();
-            localStorage.setItem('beeLastWeeklyReset', lastWeeklyReset);
-            localStorage.setItem('beeClaimedTasks', JSON.stringify(claimedTasks));
-        }
-    }
-
-    function renderTaskGroup(tasks, containerId) {
-        const el = document.getElementById(containerId);
-        if (!el) return;
-        el.innerHTML = '';
-        tasks.forEach(task => {
-            const done = claimedTasks.includes(task.id);
-            const item = document.createElement('div');
-            item.className = 'task-item' + (done ? ' done' : '');
-            item.innerHTML = `
-                <div class="task-info">
-                    <div class="task-title">${task.title}</div>
-                    <div class="task-reward">+${task.reward} BEE</div>
-                </div>
-                <button class="task-btn ${done ? 'claimed' : ''}" data-task="${task.id}" ${done ? 'disabled' : ''}>
-                    ${done ? '✓ Готово' : 'Забрать'}
-                </button>`;
-            el.appendChild(item);
-        });
-        el.querySelectorAll('.task-btn').forEach(btn => btn.addEventListener('click', () => handleTaskClick(btn.dataset.task)));
-    }
-
-    function renderTasks() {
-        checkDailyReset();
-        checkWeeklyReset();
-        renderTaskGroup(DAILY_TASKS, 'subtab-daily');
-        renderTaskGroup(WEEKLY_TASKS, 'subtab-weekly');
-    }
-
-    function handleTaskClick(taskId) {
-        const task = [...DAILY_TASKS, ...WEEKLY_TASKS].find(t => t.id === taskId);
-        if (!task || claimedTasks.includes(taskId)) return;
-        if (task.action === 'showRef') switchTab('ref');
-        else if (task.url) window.open(task.url, '_blank');
-        claimTask(taskId);
-    }
-
-    function claimTask(taskId) {
-        const task = [...DAILY_TASKS, ...WEEKLY_TASKS].find(t => t.id === taskId);
-        if (!task || claimedTasks.includes(taskId)) return;
-        balance += task.reward;
-        claimedTasks.push(taskId);
-        localStorage.setItem('beeClaimedTasks', JSON.stringify(claimedTasks));
-        updateUI();
-        renderTasks();
-    }
-
-    function claimTaskSilently(taskId) {
-        if (!claimedTasks.includes(taskId)) claimTask(taskId);
-    }
-
-    document.querySelectorAll('.subtab-btn[data-subtab]').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('#tab-tasks .subtab-btn').forEach(b => b.classList.remove('active'));
-            document.querySelectorAll('#tab-tasks .subtab-panel').forEach(p => p.classList.remove('active'));
-            btn.classList.add('active');
-            document.getElementById('subtab-' + btn.dataset.subtab).classList.add('active');
-        });
-    });
-
-    // ==================== КАРТА МИРА / РЕЙДЫ ====================
-    const TARGET_SEED = [
-        { id: 't1', name: 'Улей Марины', level: 4, defense: 2, maxHoney: 220 },
-        { id: 't2', name: 'Улей Дмитрия', level: 7, defense: 5, maxHoney: 480 },
-        { id: 't3', name: 'Улей Алисы', level: 2, defense: 1, maxHoney: 120 },
-        { id: 't4', name: 'Улей Игоря', level: 9, defense: 7, maxHoney: 650 },
-        { id: 't5', name: 'Улей Насти', level: 5, defense: 3, maxHoney: 300 },
-        { id: 't6', name: 'Улей Романа', level: 12, defense: 10, maxHoney: 900 }
-    ];
-    const RAID_COOLDOWN_MS = 5 * 60 * 1000; // 5 минут
-
-    function loadTargetsState() {
-        const saved = JSON.parse(localStorage.getItem('beeTargets') || 'null');
-        if (saved) return saved;
-        const initial = TARGET_SEED.map(t => ({ ...t, honey: Math.round(t.maxHoney * 0.6), lastUpdate: Date.now(), lastRaid: 0 }));
-        localStorage.setItem('beeTargets', JSON.stringify(initial));
-        return initial;
-    }
-    let targets = loadTargetsState();
-
-    function saveTargets() { localStorage.setItem('beeTargets', JSON.stringify(targets)); }
-
-    function regenTargets() {
-        const now = Date.now();
-        targets.forEach(t => {
-            const elapsedH = (now - t.lastUpdate) / 3600000;
-            if (elapsedH > 0) {
-                t.honey = Math.min(t.maxHoney, t.honey + t.maxHoney * elapsedH * 0.2); // 20% в час
-                t.lastUpdate = now;
-            }
-        });
-        saveTargets();
-    }
-
-    function renderTargets() {
-        regenTargets();
-        const el = document.getElementById('targetsList');
-        if (!el) return;
-        el.innerHTML = '';
-        const now = Date.now();
-        targets.forEach(t => {
-            const onCooldown = (now - t.lastRaid) < RAID_COOLDOWN_MS;
-            const remainMin = Math.ceil((RAID_COOLDOWN_MS - (now - t.lastRaid)) / 60000);
-            const item = document.createElement('div');
-            item.className = 'target-item';
-            item.innerHTML = `
-                <div class="target-info">
-                    <div class="target-title">🏠 ${t.name} <span class="lvl-badge">ур. ${t.level}</span></div>
-                    <div class="target-sub">
-                        <span class="honey-badge">🍯 ${Math.floor(t.honey)}</span>
-                        <span class="defense-badge">🛡 ${t.defense}</span>
+            <!-- ================= РЕФЕРАЛЫ ================= -->
+            <div class="tab-panel" id="tab-ref">
+                <div class="section-title"><i class="fas fa-link"></i> Рефералы</div>
+                <div class="card">
+                    <div class="card-title"><i class="fas fa-share-alt"></i> Ваша реферальная ссылка</div>
+                    <div class="ref-link" id="refLink">загрузка...</div>
+                    <button class="upgrade-btn ghost copy-btn" id="copyRefBtn"><i class="fas fa-copy"></i> Скопировать ссылку</button>
+                    <div class="ref-stats">
+                        <div class="ref-stat-box"><div class="num" id="refCount">0</div><div class="lbl">приглашено</div></div>
+                        <div class="ref-stat-box"><div class="num" id="refEarned">0</div><div class="lbl">заработано BEE</div></div>
                     </div>
                 </div>
-                <button class="raid-btn" data-target="${t.id}" ${onCooldown ? 'disabled' : ''}>
-                    ${onCooldown ? '⏳ ' + remainMin + ' мин' : '⚔ Грабить'}
-                </button>`;
-            el.appendChild(item);
-        });
-        el.querySelectorAll('.raid-btn').forEach(btn => {
-            btn.addEventListener('click', () => raidTarget(btn.dataset.target));
-        });
-    }
+            </div>
 
-    function raidTarget(id) {
-        const t = targets.find(x => x.id === id);
-        if (!t) return;
-        const now = Date.now();
-        if ((now - t.lastRaid) < RAID_COOLDOWN_MS) return;
+        </div>
 
-        const successChance = Math.max(15, Math.min(85, 45 + (attackLevel * 3 - t.defense * 4)));
-        const roll = Math.random() * 100;
-        t.lastRaid = now;
-
-        if (roll <= successChance) {
-            const stolen = Math.round(t.honey * (0.2 + Math.random() * 0.2));
-            t.honey = Math.max(0, t.honey - stolen);
-            balance += stolen;
-            alert(`Успех! Ваши пчёлы принесли ${stolen} 🍯 из улья «${t.name}».`);
-        } else {
-            alert(`Рейд не удался — стража улья «${t.name}» отбила атаку. Попробуйте позже.`);
-        }
-        saveTargets();
-        updateUI();
-        renderTargets();
-    }
-
-    // ==================== МАГАЗИН / ОПЛАТА СБП ====================
-    const SHOP_PACKS = [
-        { id: 'p1', amount: 100, price: 49 },
-        { id: 'p2', amount: 550, price: 199, badge: 'популярно' },
-        { id: 'p3', amount: 1200, price: 399 },
-        { id: 'p4', amount: 3000, price: 899, badge: 'выгодно' }
-    ];
-
-    function renderShop() {
-        const el = document.getElementById('shopPacks');
-        if (!el) return;
-        el.innerHTML = '';
-        SHOP_PACKS.forEach(pack => {
-            const div = document.createElement('div');
-            div.className = 'shop-pack' + (pack.badge === 'популярно' ? ' popular' : '');
-            div.innerHTML = `
-                <div class="shop-pack-info">
-                    <span class="amount">🍯 ${pack.amount} BEE</span>
-                    ${pack.badge ? `<span class="badge">${pack.badge}</span>` : ''}
+        <!-- ================= МАГАЗИН (модалка) ================= -->
+        <div class="modal-overlay" id="shopModal">
+            <div class="modal-sheet">
+                <div class="modal-header">
+                    <div class="modal-title"><i class="fas fa-store"></i> Магазин BEE</div>
+                    <button class="modal-close" id="closeShopBtn"><i class="fas fa-times"></i></button>
                 </div>
-                <button class="shop-pack-price" data-pack="${pack.id}">${pack.price} ₽</button>`;
-            el.appendChild(div);
+                <div id="shopPacks"></div>
+                <div class="sbp-note"><i class="fas fa-bolt"></i> Оплата через СБП — мгновенное зачисление</div>
+            </div>
+        </div>
+
+        <!-- ================= НИЖНЯЯ НАВИГАЦИЯ ================= -->
+        <div class="bottom-nav">
+            <button class="nav-btn active" data-tab="main"><span class="nav-icon"><i class="fas fa-home"></i></span>Главная</button>
+            <button class="nav-btn" data-tab="hive"><span class="nav-icon"><i class="fas fa-hive"></i></span>Улей</button>
+            <button class="nav-btn" data-tab="tasks"><span class="nav-icon"><i class="fas fa-tasks"></i></span>Задания</button>
+            <button class="nav-btn" data-tab="map"><span class="nav-icon"><i class="fas fa-map"></i></span>Карта</button>
+            <button class="nav-btn" data-tab="wallet"><span class="nav-icon"><i class="fas fa-wallet"></i></span>Кошелёк</button>
+            <button class="nav-btn" data-tab="ref"><span class="nav-icon"><i class="fas fa-link"></i></span>Рефералы</button>
+        </div>
+    </div>
+
+    <script>
+        // ==================== НАСТРОЙКИ ====================
+        const BOT_USERNAME = 'YourBotUsername'; // ЗАМЕНИТЕ НА РЕАЛЬНОЕ ИМЯ БОТА (без @)
+
+        // ==================== СОСТОЯНИЕ ====================
+        let balance = parseInt(localStorage.getItem('beeBalance')) || 0;
+        let perClick = parseInt(localStorage.getItem('beePerClick')) || 1;
+        let totalClicks = parseInt(localStorage.getItem('beeTotalClicks')) || 0;
+        let upgradeLevel = parseInt(localStorage.getItem('beeUpgradeLevel')) || 0;
+        let autoActive = localStorage.getItem('beeAutoActive') === 'true';
+        let autoInterval = null;
+        let refCount = parseInt(localStorage.getItem('beeRefCount')) || 0;
+        let refEarned = parseInt(localStorage.getItem('beeRefEarned')) || 0;
+
+        let critLevel = parseInt(localStorage.getItem('beeCritLevel')) || 0;
+        let attackLevel = parseInt(localStorage.getItem('beeAttackLevel')) || 0;
+        let wingLevel = parseInt(localStorage.getItem('beeWingLevel')) || 0;
+
+        let honeycombLevel = parseInt(localStorage.getItem('beeHoneycombLevel')) || 0;
+        let warehouseLevel = parseInt(localStorage.getItem('beeWarehouseLevel')) || 0;
+        let hiveHoney = parseFloat(localStorage.getItem('beeHiveHoney')) || 0;
+        let lastPassiveTick = parseInt(localStorage.getItem('beeLastPassiveTick')) || Date.now();
+
+        let claimedTasks = JSON.parse(localStorage.getItem('beeClaimedTasks') || '[]');
+        let lastDailyReset = localStorage.getItem('beeLastDailyReset') || null;
+        let lastWeeklyReset = localStorage.getItem('beeLastWeeklyReset') || null;
+
+        // ==================== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ====================
+        function critChance() { return Math.min(50, critLevel * 3); }
+
+        function hiveCap() { return 150 + warehouseLevel * 120; }
+
+        function honeyPerSec() { return honeycombLevel * 0.4; }
+
+        function autoTickInterval() { return Math.max(250, 1000 - wingLevel * 90); }
+
+        // ==================== АПГРЕЙДЫ ====================
+        const BEE_UPGRADES = [{
+            id: 'power',
+            title: 'Сила укуса',
+            icon: 'fa-bolt',
+            desc: () => `+1 BEE за клик (сейчас ${perClick})`,
+            level: () => upgradeLevel,
+            cost: () => 10 + upgradeLevel * 8,
+            buy: () => { perClick += 1;
+                upgradeLevel++; }
+        }, {
+            id: 'crit',
+            title: 'Критический удар',
+            icon: 'fa-bullseye',
+            desc: () => `Шанс x3 награды за клик: ${critChance()}%`,
+            level: () => critLevel,
+            cost: () => 60 + critLevel * 35,
+            buy: () => { critLevel++; },
+            maxLevel: 16
+        }, {
+            id: 'attack',
+            title: 'Сила атаки',
+            icon: 'fa-sword',
+            desc: () => `Повышает шанс успеха при рейдах (сейчас ${attackLevel * 3}%)`,
+            level: () => attackLevel,
+            cost: () => 80 + attackLevel * 45,
+            buy: () => { attackLevel++; }
+        }, {
+            id: 'wing',
+            title: 'Скорость крыльев',
+            icon: 'fa-feather-alt',
+            desc: () => `Ускоряет автокликер (интервал ${autoTickInterval()} мс)`,
+            level: () => wingLevel,
+            cost: () => 100 + wingLevel * 60,
+            buy: () => { wingLevel++;
+                if (autoActive) startAutoClick(); },
+            maxLevel: 8
+        }];
+
+        const HIVE_BUILDINGS = [{
+            id: 'honeycomb',
+            title: 'Соты',
+            icon: 'fa-jar',
+            desc: () => `Пассивный доход: +${honeyPerSec().toFixed(1)} BEE/сек в улей`,
+            level: () => honeycombLevel,
+            cost: () => 90 + honeycombLevel * 55,
+            buy: () => { honeycombLevel++; }
+        }, {
+            id: 'warehouse',
+            title: 'Склад',
+            icon: 'fa-warehouse',
+            desc: () => `Вместимость улья: ${hiveCap()} BEE`,
+            level: () => warehouseLevel,
+            cost: () => 120 + warehouseLevel * 70,
+            buy: () => { warehouseLevel++; }
+        }];
+
+        function renderUpgradeList(list, containerId) {
+            const el = document.getElementById(containerId);
+            if (!el) return;
+            el.innerHTML = '';
+            list.forEach(u => {
+                const lvl = u.level();
+                const maxed = u.maxLevel && lvl >= u.maxLevel;
+                const cost = u.cost();
+                const item = document.createElement('div');
+                item.className = 'upg-item';
+                item.innerHTML = `
+                    <div class="upg-info">
+                        <div class="upg-title"><i class="fas ${u.icon}"></i> ${u.title} <span class="lvl-badge">ур. ${lvl}</span></div>
+                        <div class="upg-desc">${u.desc()}</div>
+                    </div>
+                    <button class="upg-btn" data-upg="${u.id}" ${maxed ? 'disabled' : ''}>
+                        ${maxed ? 'MAX' : cost + ' 🍯'}
+                    </button>`;
+                el.appendChild(item);
+            });
+            el.querySelectorAll('.upg-btn').forEach(btn => {
+                btn.addEventListener('click', () => buyUpgrade(btn.dataset.upg));
+            });
+        }
+
+        function buyUpgrade(id) {
+            const u = BEE_UPGRADES.find(x => x.id === id) || HIVE_BUILDINGS.find(x => x.id === id);
+            if (!u) return;
+            if (u.maxLevel && u.level() >= u.maxLevel) return;
+            const cost = u.cost();
+            if (balance < cost) { alert('Не хватает BEE!'); return; }
+            balance -= cost;
+            u.buy();
+            persistUpgrades();
+            updateUI();
+            renderHiveTabs();
+        }
+
+        function persistUpgrades() {
+            localStorage.setItem('beeCritLevel', critLevel);
+            localStorage.setItem('beeAttackLevel', attackLevel);
+            localStorage.setItem('beeWingLevel', wingLevel);
+            localStorage.setItem('beeHoneycombLevel', honeycombLevel);
+            localStorage.setItem('beeWarehouseLevel', warehouseLevel);
+        }
+
+        function renderHiveTabs() {
+            renderUpgradeList(BEE_UPGRADES, 'hivetab-bee');
+            renderUpgradeList(HIVE_BUILDINGS, 'hivetab-building');
+        }
+
+        document.querySelectorAll('.subtab-btn[data-hivetab]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('#tab-hive .subtab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('#tab-hive .subtab-panel').forEach(p => p.classList.remove('active'));
+                btn.classList.add('active');
+                document.getElementById('hivetab-' + btn.dataset.hivetab).classList.add('active');
+            });
         });
-        el.querySelectorAll('.shop-pack-price').forEach(btn => btn.addEventListener('click', () => payWithSBP(btn.dataset.pack)));
-    }
 
-    function openShop() { document.getElementById('shopModal').classList.add('open'); renderShop(); }
-    function closeShop() { document.getElementById('shopModal').classList.remove('open'); }
-    document.getElementById('openShopBtn').addEventListener('click', openShop);
-    document.getElementById('openShopBtn2').addEventListener('click', openShop);
-    document.getElementById('closeShopBtn').addEventListener('click', closeShop);
-    document.getElementById('shopModal').addEventListener('click', e => { if (e.target.id === 'shopModal') closeShop(); });
-
-    // Заглушка оплаты через СБП.
-    async function payWithSBP(packId) {
-        const pack = SHOP_PACKS.find(p => p.id === packId);
-        if (!pack) return;
-        alert(
-            `Оплата через СБП пока не подключена.\n\n` +
-            `Пакет: ${pack.amount} BEE за ${pack.price} ₽.\n` +
-            `Чтобы включить реальные платежи, подключите backend и платёжного ` +
-            `провайдера с поддержкой СБП (например, ЮKassa, Т-Банк Эквайринг, ` +
-            `CloudPayments) — зачисление токенов должно происходить только после ` +
-            `подтверждения оплаты сервером.`
-        );
-    }
-
-    // ==================== НИЖНЯЯ НАВИГАЦИЯ ====================
-    document.querySelectorAll('.nav-btn').forEach(btn => btn.addEventListener('click', () => switchTab(btn.dataset.tab)));
-
-    function switchTab(tab) {
-        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById('tab-' + tab).classList.add('active');
-        document.querySelector(`.nav-btn[data-tab="${tab}"]`).classList.add('active');
-        // Обновляем содержимое вкладок при переключении
-        if (tab === 'wallet') claimTaskSilently('daily_wallet_check');
-        if (tab === 'tasks') renderTasks();
-        if (tab === 'hive') { renderHiveTabs(); tickPassiveHoney(); }
-        if (tab === 'map') renderTargets();
-    }
-
-    // ==================== ОСНОВНЫЕ ДЕЙСТВИЯ ====================
-    function updateUI() {
-        document.getElementById('balance').textContent = Math.floor(balance);
-        document.getElementById('balanceTop').textContent = Math.floor(balance);
-        document.getElementById('perClick').textContent = perClick;
-        document.getElementById('totalClicks').textContent = totalClicks;
-        document.getElementById('upgradeCost').textContent = getUpgradeCost();
-        document.getElementById('autoCost').textContent = getAutoCost();
-        document.getElementById('profileLevel').textContent = upgradeLevel;
-        document.getElementById('autoBtn').textContent = autoActive ? '✅ Автокликер активен' : '🤖 Автокликер (стоит: ' + getAutoCost() + ' BEE)';
-        document.getElementById('refCount').textContent = refCount;
-        document.getElementById('refEarned').textContent = refEarned;
-        document.getElementById('statAttack').textContent = attackLevel * 3 + '%';
-        document.getElementById('statCrit').textContent = critChance();
-
-        localStorage.setItem('beeBalance', balance);
-        localStorage.setItem('beePerClick', perClick);
-        localStorage.setItem('beeTotalClicks', totalClicks);
-        localStorage.setItem('beeUpgradeLevel', upgradeLevel);
-        localStorage.setItem('beeAutoActive', autoActive);
-        localStorage.setItem('beeRefCount', refCount);
-        localStorage.setItem('beeRefEarned', refEarned);
-    }
-
-    function getUpgradeCost() { return 10 + upgradeLevel * 8; }
-    function getAutoCost() { return 50; }
-
-    document.getElementById('clickBtn').addEventListener('click', function() {
-        let gain = perClick;
-        if (Math.random() * 100 < critChance()) { gain *= 3; }
-        balance += gain;
-        totalClicks++;
-        claimTaskSilently('daily_10clicks');
-        updateUI();
-    });
-
-    document.getElementById('upgradeBtn').addEventListener('click', function() {
-        const cost = getUpgradeCost();
-        if (balance >= cost) { balance -= cost; perClick += 1; upgradeLevel++; updateUI(); }
-        else alert('Не хватает BEE!');
-    });
-
-    document.getElementById('autoBtn').addEventListener('click', function() {
-        if (autoActive) { alert('Автокликер уже работает!'); return; }
-        const cost = getAutoCost();
-        if (balance >= cost) { balance -= cost; autoActive = true; updateUI(); startAutoClick(); }
-        else alert('Не хватает BEE!');
-    });
-
-    function startAutoClick() {
-        if (autoInterval) clearInterval(autoInterval);
-        autoInterval = setInterval(() => { balance += perClick; totalClicks++; updateUI(); }, autoTickInterval());
-    }
-    if (autoActive) startAutoClick();
-
-    // ==================== ПРОФИЛЬ ====================
-    function initProfile() {
-        const tg = window.Telegram?.WebApp;
-        const user = tg?.initDataUnsafe?.user;
-        const nameEl = document.getElementById('profileName');
-        const avatarEl = document.getElementById('avatar');
-        if (user) {
-            const fullName = [user.first_name, user.last_name].filter(Boolean).join(' ');
-            nameEl.textContent = fullName || (user.username ? '@' + user.username : 'Игрок');
-            if (user.photo_url) avatarEl.innerHTML = `<img src="${user.photo_url}" alt="avatar">`;
-            else avatarEl.textContent = (user.first_name || 'B')[0].toUpperCase();
-        } else {
-            nameEl.textContent = 'Гость';
-            avatarEl.textContent = '🐝';
+        // ==================== ПАССИВНЫЙ ДОХОД УЛЬЯ ====================
+        function tickPassiveHoney() {
+            const now = Date.now();
+            const elapsedSec = Math.max(0, (now - lastPassiveTick) / 1000);
+            if (elapsedSec > 0) {
+                hiveHoney = Math.min(hiveCap(), hiveHoney + honeyPerSec() * elapsedSec);
+                lastPassiveTick = now;
+                localStorage.setItem('beeHiveHoney', hiveHoney);
+                localStorage.setItem('beeLastPassiveTick', lastPassiveTick);
+            }
+            document.getElementById('hiveHoneyVal').textContent = Math.floor(hiveHoney);
+            document.getElementById('hiveCapVal').textContent = hiveCap();
+            document.getElementById('hiveCapFill').style.width = Math.min(100, (hiveHoney / hiveCap()) * 100) + '%';
         }
-    }
 
-    // ==================== РЕФЕРАЛЬНАЯ ССЫЛКА ====================
-    function getRefLink() {
-        const tg = window.Telegram?.WebApp;
-        if (tg && tg.initDataUnsafe?.user) {
-            const userId = tg.initDataUnsafe.user.id;
-            return `https://t.me/${BOT_USERNAME}?start=ref_${userId}`;
+        document.getElementById('collectHiveBtn').addEventListener('click', () => {
+            const amount = Math.floor(hiveHoney);
+            if (amount <= 0) { alert('В улье пока пусто — подождите или постройте больше сот.'); return; }
+            balance += amount;
+            hiveHoney = 0;
+            localStorage.setItem('beeHiveHoney', hiveHoney);
+            updateUI();
+            tickPassiveHoney();
+        });
+
+        setInterval(tickPassiveHoney, 1000);
+
+        // ==================== ЗАДАНИЯ ====================
+        const DAILY_TASKS = [
+            { id: 'daily_bonus', title: 'Ежедневный бонус', reward: 15, type: 'daily' },
+            { id: 'daily_10clicks', title: 'Сделать 10 кликов сегодня', reward: 10, type: 'daily' },
+            { id: 'daily_wallet_check', title: 'Зайти в раздел «Кошелёк»', reward: 5, type: 'daily' }
+        ];
+        const WEEKLY_TASKS = [
+            { id: 'weekly_subscribe', title: 'Подписаться на канал', reward: 50, url: 'https://t.me/your_channel',
+            type: 'weekly' },
+            { id: 'weekly_invite3', title: 'Пригласить 3 друзей', reward: 100, action: 'showRef', type: 'weekly' },
+            { id: 'weekly_100clicks', title: 'Сделать 100 кликов за неделю', reward: 60, type: 'weekly' }
+        ];
+
+        function checkDailyReset() {
+            const now = new Date();
+            if (!lastDailyReset || (now - new Date(lastDailyReset)) >= 24 * 60 * 60 * 1000) {
+                claimedTasks = claimedTasks.filter(id => !DAILY_TASKS.some(t => t.id === id));
+                lastDailyReset = now.toISOString();
+                localStorage.setItem('beeLastDailyReset', lastDailyReset);
+                localStorage.setItem('beeClaimedTasks', JSON.stringify(claimedTasks));
+            }
         }
-        return 'Откройте через Telegram, чтобы получить ссылку';
-    }
-    document.getElementById('refLink').textContent = getRefLink();
-    document.getElementById('copyRefBtn').addEventListener('click', () => {
-        const text = document.getElementById('refLink').textContent;
-        navigator.clipboard?.writeText(text).then(() => alert('Ссылка скопирована!')).catch(() => {});
-    });
 
-    // ==================== TON КОШЕЛЁК ====================
-    async function connectTonWallet() {
-        try {
-            if (!window.Telegram?.WebApp?.TON) {
-                alert('Ваш кошелёк TON не обнаружен. Откройте приложение через Telegram с установленным TON Wallet.');
+        function checkWeeklyReset() {
+            const now = new Date();
+            if (!lastWeeklyReset || (now - new Date(lastWeeklyReset)) >= 7 * 24 * 60 * 60 * 1000) {
+                claimedTasks = claimedTasks.filter(id => !WEEKLY_TASKS.some(t => t.id === id));
+                lastWeeklyReset = now.toISOString();
+                localStorage.setItem('beeLastWeeklyReset', lastWeeklyReset);
+                localStorage.setItem('beeClaimedTasks', JSON.stringify(claimedTasks));
+            }
+        }
+
+        function renderTaskGroup(tasks, containerId) {
+            const el = document.getElementById(containerId);
+            if (!el) return;
+            el.innerHTML = '';
+            tasks.forEach(task => {
+                const done = claimedTasks.includes(task.id);
+                const item = document.createElement('div');
+                item.className = 'task-item' + (done ? ' done' : '');
+                item.innerHTML = `
+                    <div class="task-info">
+                        <div class="task-title"><i class="fas fa-check-circle" style="color:#facc15;"></i> ${task.title}</div>
+                        <div class="task-reward"><i class="fas fa-coins"></i> +${task.reward} BEE</div>
+                    </div>
+                    <button class="task-btn ${done ? 'claimed' : ''}" data-task="${task.id}" ${done ? 'disabled' : ''}>
+                        ${done ? '✓ Готово' : 'Забрать'}
+                    </button>`;
+                el.appendChild(item);
+            });
+            el.querySelectorAll('.task-btn').forEach(btn => btn.addEventListener('click', () => handleTaskClick(btn.dataset
+            .task)));
+        }
+
+        function renderTasks() {
+            checkDailyReset();
+            checkWeeklyReset();
+            renderTaskGroup(DAILY_TASKS, 'subtab-daily');
+            renderTaskGroup(WEEKLY_TASKS, 'subtab-weekly');
+        }
+
+        function handleTaskClick(taskId) {
+            const task = [...DAILY_TASKS, ...WEEKLY_TASKS].find(t => t.id === taskId);
+            if (!task || claimedTasks.includes(taskId)) return;
+            if (task.action === 'showRef') switchTab('ref');
+            else if (task.url) window.open(task.url, '_blank');
+            claimTask(taskId);
+        }
+
+        function claimTask(taskId) {
+            const task = [...DAILY_TASKS, ...WEEKLY_TASKS].find(t => t.id === taskId);
+            if (!task || claimedTasks.includes(taskId)) return;
+            balance += task.reward;
+            claimedTasks.push(taskId);
+            localStorage.setItem('beeClaimedTasks', JSON.stringify(claimedTasks));
+            updateUI();
+            renderTasks();
+        }
+
+        function claimTaskSilently(taskId) {
+            if (!claimedTasks.includes(taskId)) claimTask(taskId);
+        }
+
+        document.querySelectorAll('.subtab-btn[data-subtab]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('#tab-tasks .subtab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('#tab-tasks .subtab-panel').forEach(p => p.classList.remove('active'));
+                btn.classList.add('active');
+                document.getElementById('subtab-' + btn.dataset.subtab).classList.add('active');
+            });
+        });
+
+        // ==================== КАРТА МИРА (визуальная) ====================
+        const TARGET_SEED = [
+            { id: 't1', name: 'Марина', level: 4, defense: 2, maxHoney: 220, x: 15, y: 25 },
+            { id: 't2', name: 'Дмитрий', level: 7, defense: 5, maxHoney: 480, x: 70, y: 20 },
+            { id: 't3', name: 'Алиса', level: 2, defense: 1, maxHoney: 120, x: 40, y: 75 },
+            { id: 't4', name: 'Игорь', level: 9, defense: 7, maxHoney: 650, x: 85, y: 65 },
+            { id: 't5', name: 'Настя', level: 5, defense: 3, maxHoney: 300, x: 25, y: 55 },
+            { id: 't6', name: 'Роман', level: 12, defense: 10, maxHoney: 900, x: 60, y: 45 }
+        ];
+        const RAID_COOLDOWN_MS = 5 * 60 * 1000;
+
+        function loadTargetsState() {
+            const saved = JSON.parse(localStorage.getItem('beeTargets') || 'null');
+            if (saved) return saved;
+            const initial = TARGET_SEED.map(t => ({ ...t, honey: Math.round(t.maxHoney * 0.6), lastUpdate: Date.now(),
+                lastRaid: 0 }));
+            localStorage.setItem('beeTargets', JSON.stringify(initial));
+            return initial;
+        }
+        let targets = loadTargetsState();
+
+        function saveTargets() { localStorage.setItem('beeTargets', JSON.stringify(targets)); }
+
+        function regenTargets() {
+            const now = Date.now();
+            targets.forEach(t => {
+                const elapsedH = (now - t.lastUpdate) / 3600000;
+                if (elapsedH > 0) {
+                    t.honey = Math.min(t.maxHoney, t.honey + t.maxHoney * elapsedH * 0.2);
+                    t.lastUpdate = now;
+                }
+            });
+            saveTargets();
+        }
+
+        function renderMap() {
+            regenTargets();
+            const container = document.getElementById('worldMapContainer');
+            if (!container) return;
+            // Удаляем старые маркеры, оставляя сетку
+            const grid = container.querySelector('.map-grid');
+            container.innerHTML = '';
+            container.appendChild(grid);
+
+            const now = Date.now();
+            targets.forEach(t => {
+                const onCooldown = (now - t.lastRaid) < RAID_COOLDOWN_MS;
+                const isDefeated = t.honey < 10; // условно разграблен
+                const marker = document.createElement('div');
+                marker.className = 'map-marker' + (isDefeated ? ' defeated' : '');
+                marker.style.left = t.x + '%';
+                marker.style.top = t.y + '%';
+                marker.dataset.target = t.id;
+
+                const honeyText = Math.floor(t.honey);
+                marker.innerHTML = `
+                    <div class="marker-icon">
+                        <i class="fas fa-hive"></i>
+                    </div>
+                    <div class="marker-label">${t.name} <span class="lvl-badge">ур.${t.level}</span></div>
+                    <div class="marker-honey"><i class="fas fa-jar"></i> ${honeyText}</div>
+                `;
+                if (onCooldown) {
+                    const remain = Math.ceil((RAID_COOLDOWN_MS - (now - t.lastRaid)) / 60000);
+                    marker.querySelector('.marker-label').textContent += ` ⏳${remain}мин`;
+                }
+                container.appendChild(marker);
+
+                marker.addEventListener('click', () => raidTarget(t.id));
+            });
+
+            // Обновляем подсказку
+            document.getElementById('mapCooldownHint').textContent =
+                'Нажмите на улей, чтобы совершить налёт (перезарядка 5 мин)';
+        }
+
+        function raidTarget(id) {
+            const t = targets.find(x => x.id === id);
+            if (!t) return;
+            const now = Date.now();
+            if ((now - t.lastRaid) < RAID_COOLDOWN_MS) {
+                const remain = Math.ceil((RAID_COOLDOWN_MS - (now - t.lastRaid)) / 60000);
+                alert(`Улей «${t.name}» ещё не восстановился. Подождите ${remain} минут.`);
                 return;
             }
-            const address = await window.Telegram.WebApp.TON.connect();
-            document.getElementById('walletStatus').innerHTML = `✅ Кошелёк: ${address.slice(0,6)}...${address.slice(-4)}`;
-            localStorage.setItem('beeWalletConnected', 'true');
-        } catch (e) {
-            alert('Ошибка подключения: ' + e.message);
+
+            const successChance = Math.max(15, Math.min(85, 45 + (attackLevel * 3 - t.defense * 4)));
+            const roll = Math.random() * 100;
+            t.lastRaid = now;
+
+            if (roll <= successChance) {
+                const stolen = Math.round(t.honey * (0.2 + Math.random() * 0.2));
+                t.honey = Math.max(0, t.honey - stolen);
+                balance += stolen;
+                alert(`Успех! Ваши пчёлы принесли ${stolen} 🍯 из улья «${t.name}».`);
+            } else {
+                alert(`Рейд не удался — стража улья «${t.name}» отбила атаку.`);
+            }
+            saveTargets();
+            updateUI();
+            renderMap();
         }
-    }
-    document.getElementById('connectWallet').addEventListener('click', connectTonWallet);
 
-    // ==================== ИНИЦИАЛИЗАЦИЯ TELEGRAM MINI APP ====================
-    if (window.Telegram && window.Telegram.WebApp) {
-        window.Telegram.WebApp.ready();
-        window.Telegram.WebApp.expand();
-    }
+        // ==================== МАГАЗИН ====================
+        const SHOP_PACKS = [
+            { id: 'p1', amount: 100, price: 49 },
+            { id: 'p2', amount: 550, price: 199, badge: 'популярно' },
+            { id: 'p3', amount: 1200, price: 399 },
+            { id: 'p4', amount: 3000, price: 899, badge: 'выгодно' }
+        ];
 
-    // ==================== ЗАПУСК ====================
-    initProfile();
-    checkDailyReset();
-    checkWeeklyReset();
-    renderTasks();
-    renderHiveTabs();
-    tickPassiveHoney();
-    updateUI();
-</script>
+        function renderShop() {
+            const el = document.getElementById('shopPacks');
+            if (!el) return;
+            el.innerHTML = '';
+            SHOP_PACKS.forEach(pack => {
+                const div = document.createElement('div');
+                div.className = 'shop-pack' + (pack.badge === 'популярно' ? ' popular' : '');
+                div.innerHTML = `
+                    <div class="shop-pack-info">
+                        <span class="amount"><i class="fas fa-jar"></i> ${pack.amount} BEE</span>
+                        ${pack.badge ? `<span class="badge">${pack.badge}</span>` : ''}
+                    </div>
+                    <button class="shop-pack-price" data-pack="${pack.id}">${pack.price} ₽</button>`;
+                el.appendChild(div);
+            });
+            el.querySelectorAll('.shop-pack-price').forEach(btn => btn.addEventListener('click', () => payWithSBP(btn
+            .dataset.pack)));
+        }
+
+        function openShop() { document.getElementById('shopModal').classList.add('open');
+            renderShop(); }
+
+        function closeShop() { document.getElementById('shopModal').classList.remove('open'); }
+        document.getElementById('openShopBtn').addEventListener('click', openShop);
+        document.getElementById('openShopBtn2').addEventListener('click', openShop);
+        document.getElementById('closeShopBtn').addEventListener('click', closeShop);
+        document.getElementById('shopModal').addEventListener('click', e => { if (e.target.id === 'shopModal') closeShop(); });
+
+        async function payWithSBP(packId) {
+            const pack = SHOP_PACKS.find(p => p.id === packId);
+            if (!pack) return;
+            alert(
+                `Оплата через СБП пока не подключена.\n\n` +
+                `Пакет: ${pack.amount} BEE за ${pack.price} ₽.\n` +
+                `Подключите backend и платёжного провайдера с поддержкой СБП.`
+            );
+        }
+
+        // ==================== НАВИГАЦИЯ ====================
+        document.querySelectorAll('.nav-btn').forEach(btn => btn.addEventListener('click', () => switchTab(btn.dataset.tab)));
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('tab-' + tab).classList.add('active');
+            document.querySelector(`.nav-btn[data-tab="${tab}"]`).classList.add('active');
+            if (tab === 'wallet') claimTaskSilently('daily_wallet_check');
+            if (tab === 'tasks') renderTasks();
+            if (tab === 'hive') { renderHiveTabs();
+                tickPassiveHoney(); }
+            if (tab === 'map') renderMap();
+        }
+
+        // ==================== ОСНОВНЫЕ ДЕЙСТВИЯ ====================
+        function updateUI() {
+            document.getElementById('balance').textContent = Math.floor(balance);
+            document.getElementById('balanceTop').textContent = Math.floor(balance);
+            document.getElementById('perClick').textContent = perClick;
+            document.getElementById('totalClicks').textContent = totalClicks;
+            document.getElementById('upgradeCost').textContent = getUpgradeCost();
+            document.getElementById('autoCost').textContent = getAutoCost();
+            document.getElementById('profileLevel').textContent = upgradeLevel;
+            document.getElementById('autoBtn').innerHTML =
+                `${autoActive ? '✅' : '<i class="fas fa-robot"></i>'} Автокликер${autoActive ? ' активен' : ' (стоит: ' + getAutoCost() + ' BEE)'}`;
+            document.getElementById('refCount').textContent = refCount;
+            document.getElementById('refEarned').textContent = refEarned;
+            document.getElementById('statAttack').textContent = attackLevel * 3 + '%';
+            document.getElementById('statCrit').textContent = critChance();
+
+            localStorage.setItem('beeBalance', balance);
+            localStorage.setItem('beePerClick', perClick);
+            localStorage.setItem('beeTotalClicks', totalClicks);
+            localStorage.setItem('beeUpgradeLevel', upgradeLevel);
+            localStorage.setItem('beeAutoActive', autoActive);
+            localStorage.setItem('beeRefCount', refCount);
+            localStorage.setItem('beeRefEarned', refEarned);
+        }
+
+        function getUpgradeCost() { return 10 + upgradeLevel * 8; }
+
+        function getAutoCost() { return 50; }
+
+        document.getElementById('clickBtn').addEventListener('click', function() {
+            let gain = perClick;
+            if (Math.random() * 100 < critChance()) { gain *= 3; }
+            balance += gain;
+            totalClicks++;
+            claimTaskSilently('daily_10clicks');
+            updateUI();
+        });
+
+        document.getElementById('upgradeBtn').addEventListener('click', function() {
+            const cost = getUpgradeCost();
+            if (balance >= cost) { balance -= cost;
+                perClick += 1;
+                upgradeLevel++;
+                updateUI(); } else alert('Не хватает BEE!');
+        });
+
+        document.getElementById('autoBtn').addEventListener('click', function() {
+            if (autoActive) { alert('Автокликер уже работает!'); return; }
+            const cost = getAutoCost();
+            if (balance >= cost) { balance -= cost;
+                autoActive = true;
+                updateUI();
+                startAutoClick(); } else alert('Не хватает BEE!');
+        });
+
+        function startAutoClick() {
+            if (autoInterval) clearInterval(autoInterval);
+            autoInterval = setInterval(() => { balance += perClick;
+                totalClicks++;
+                updateUI(); }, autoTickInterval());
+        }
+        if (autoActive) startAutoClick();
+
+        // ==================== ПРОФИЛЬ ====================
+        function initProfile() {
+            const tg = window.Telegram?.WebApp;
+            const user = tg?.initDataUnsafe?.user;
+            const nameEl = document.getElementById('profileName');
+            const avatarEl = document.getElementById('avatar');
+            if (user) {
+                const fullName = [user.first_name, user.last_name].filter(Boolean).join(' ');
+                nameEl.textContent = fullName || (user.username ? '@' + user.username : 'Игрок');
+                if (user.photo_url) avatarEl.innerHTML = `<img src="${user.photo_url}" alt="avatar">`;
+                else avatarEl.innerHTML = `<i class="fas fa-user"></i>`;
+            } else {
+                nameEl.textContent = 'Гость';
+                avatarEl.innerHTML = `<i class="fas fa-user"></i>`;
+            }
+        }
+
+        // ==================== РЕФЕРАЛЫ ====================
+        function getRefLink() {
+            const tg = window.Telegram?.WebApp;
+            if (tg && tg.initDataUnsafe?.user) {
+                const userId = tg.initDataUnsafe.user.id;
+                return `https://t.me/${BOT_USERNAME}?start=ref_${userId}`;
+            }
+            return 'Откройте через Telegram, чтобы получить ссылку';
+        }
+        document.getElementById('refLink').textContent = getRefLink();
+        document.getElementById('copyRefBtn').addEventListener('click', () => {
+            const text = document.getElementById('refLink').textContent;
+            navigator.clipboard?.writeText(text).then(() => alert('Ссылка скопирована!')).catch(() => {});
+        });
+
+        // ==================== TON КОШЕЛЁК ====================
+        async function connectTonWallet() {
+            try {
+                if (!window.Telegram?.WebApp?.TON) {
+                    alert('Кошелёк TON не обнаружен. Установите TON Wallet в Telegram.');
+                    return;
+                }
+                const address = await window.Telegram.WebApp.TON.connect();
+                document.getElementById('walletStatus').innerHTML =
+                    `<i class="fas fa-check-circle" style="color:#22c55e;"></i> Кошелёк: ${address.slice(0,6)}...${address.slice(-4)}`;
+                localStorage.setItem('beeWalletConnected', 'true');
+            } catch (e) {
+                alert('Ошибка подключения: ' + e.message);
+            }
+        }
+        document.getElementById('connectWallet').addEventListener('click', connectTonWallet);
+
+        // ==================== ИНИЦИАЛИЗАЦИЯ TELEGRAM ====================
+        if (window.Telegram && window.Telegram.WebApp) {
+            window.Telegram.WebApp.ready();
+            window.Telegram.WebApp.expand();
+        }
+
+        // ==================== ЗАПУСК ====================
+        initProfile();
+        checkDailyReset();
+        checkWeeklyReset();
+        renderTasks();
+        renderHiveTabs();
+        tickPassiveHoney();
+        renderMap();
+        updateUI();
+    </script>
 </body>
 </html>
